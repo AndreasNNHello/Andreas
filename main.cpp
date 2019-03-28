@@ -2,88 +2,285 @@
 #include "libtcod.h"
 #include "main.h"
 #include <iostream>
+#include <ostream>
 #include <vector>
 #include <fstream>
 #include <string>
+#include <algorithm>
+#include <bsp.hpp>
+#include <map>
 
 
-TCOD_console_t TCOD_console_from_file(const char *filename);
-/*Class Point{
-    int x,y;
-    void Po(asd x, sad y){
-        return ;
+std::ifstream& operator>>(std::ifstream &file, TwoArray<char> &Array, ){
+    unsigned height, width;
+    int num1, num2, num3, num4, num5;
+    file >> height >> width;
+    TwoArray<char> mapLocal(height, width);
+    Array = mapLocal;
+    std::string buf;
+    std::string bufNum;
+    getline(file, buf);
+    /*for (auto va = buf.begin(); va < buf.end(); va++){
+        Num.std::push_back(buf);
+        std::sort(Num.begin(), Num.end());
+    }*/
+    for (auto i = 0; i < height; i++){
+        for (auto j = 0; j <= width; j++) {
+            if (Array.getObjPos(i,j) == 'o')
+                {Array.setboxPos(bn,hj,file.get());}
+            else
+                Array.setObjPos(i, j, file.get());
+        }
     }
-};*/
+    file >> num1 >> num2 >> num3 >> num4 >> num5;
+    std::vector<int> Num = {num1, num2, num3, num4, num5};
+    getline(file, bufNum);
+}
+/*
+std::ostream& operator<<(std::ostream& stream, TwoArray<char>& Array){
+    for (auto i = 1; i <= Array.getDimY(); i++) {
+        for (auto j = 1; j <= Array.getDimX(); j++) {
+            stream << Array.getObjPos(i, j);
+        }
+        std::cout << std::endl;
+    }
+    return stream;
+}*/
 
-template <typename T> class Field {
-public:
-    Field (T* w, T* h, std::vector<T*> a)
-{
-    width = w;
-    height = h;
-    std::vector<T>arr = a;
-};
+TCODColor asd(){
+    TCODColor color(100,10,200);
+    return color;
+}
 
-~Field();
-
-Field dsf();
-Field fas();
-
-private:
-    T width, height;
-    std::vector<T>a;
-};
+TCODColor colNum(){
+    TCODColor color(0,0,0);
+    return color;
+}
 
 
-//void TCODConsole::setWindowTitle(const char *title){}
-//bool TCODConsole::isWindowClosed(){}
-//void TCODConsole::setDefaultBackground(TCODColor back){}
-//void TCODConsole::setDefaultForeground(TCODColor fore) {}
-//TCODConsole::printRect(int x,int y, int w, int h, char){}
-class T{
+void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colourVec);
+void updateWinPositions(std::map<std::vector<int>,char>& mapOfWinPositions, const std::vector<TCODColor>& colVec);
+void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colourVec, std::vector<int>& tmpPlrPos, std::map<std::vector<int>,char>& mapCharWin);
+bool ifWin(std::map<std::vector<int>,char>& mapOfWinPositions);
 
-};
+int main() {
+    TwoArray<char> arr;
+    std::ifstream in("Field.txt");
+    in >> arr;
+    const TCODColor player {0,255,0};
+    const TCODColor wall{255,0,0};
+    const TCODColor box{0,255,255};
+    const TCODColor winCross{255,255,255};
+    const std::vector<TCODColor> colourVec = {player, wall, box, winCross};
+    std::map<std::vector<int>,char> mapCharWin;
+    std::vector<int> tempPlrPos;
+    std::vector<int> Pth;
+    //arr.PrintMap(Array);
+    //arr.Moving(arr);
 
-int main(){
-    char buf[50];
-    std::ifstream loc("field.txt(path)");
-    // takes string from File and compute value w,h
-    loc.getline(buf,50);
-    std::vector<T> arr;
-    int h = std::string::length(buf);
-    int w = (int)(arr / h);
-    // push charac.. into vector
-    for (auto n = arr.begin(); n != arr.end(); n++){
-        for(auto i = 0; i < w; i++){
-            for(auto j = 0; j < h; j++){
-                  arr.push_back();
+    PaintMap(arr, colourVec, tempPlrPos, mapCharWin);
+
+    while (!ifWin(mapCharWin)) {
+        updateWinPositions(mapCharWin, colourVec);
+        Moving(tempPlrPos, colourVec);
+    }
+
+    TCODConsole::initRoot(arr.getDimX()+15,arr.getDimY()+15,"You win!", false, TCOD_RENDERER_GLSL);
+    TCODConsole::root->setDefaultBackground(asd());
+    TCODConsole::root->clear();
+    //TCODConsole::root->printEx(15,15, TCOD_BKGND_BURN, TCOD_CENTER, "Congratulation!", TCOD_COLOR_BLUE);
+    TCODConsole::root->setColorControl(TCOD_COLCTRL_1,TCODColor::red,TCODColor::black);
+    TCODConsole::root->print(15, 15, "Congratulation!", TCOD_COLCTRL_1, TCOD_COLCTRL_STOP);
+    TCODConsole::root->flush();
+
+    while(1){}
+    return 0;
+}
+
+void updateWinPositions(std::map<std::vector<int>,char>& mapOfWinPositions, const std::vector<TCODColor>& colVec){
+    for (auto &cross : mapOfWinPositions) {
+        if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == 'x') {
+            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[3]);
+            cross.second = 'x';
+        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == 'o') {
+            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[2]);
+            cross.second = 'o';
+        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == '@') {
+            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[0]);
+            cross.second = '@';
+        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == ' ') {
+            TCODConsole::root->setChar(cross.first[0], cross.first[1], 'x');
+            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[3]);
+        }
+    }
+}
+
+void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec){
+    TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+    TCODConsole::root->flush();
+
+    int turn = 0;
+    int Score = 1000;
+
+    if ( key.vk == TCODK_UP ) {
+        if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) != '#'){
+            if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) != 'o'){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[0]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] - 1};
+            }
+
+            else if ((TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) == 'o')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2) != '#')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2) != 'o')){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[0]);
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 2, 'o');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 2,colVec[2]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] - 1};
             }
         }
-    //return std::vector<T> arr;
-    };
-
-
-    for (auto p:arr){
-
+        TCODConsole::root->flush();
     }
-    //arr.emplace(arr.begin(), (char*)"#")
-    std::cout<< arr.capacity() <<std::endl;
-    TCOD_console_init_root(50,50,"Hello, players!",false, TCOD_RENDERER_OPENGL);
+
+    else if ( key.vk == TCODK_LEFT ) {
+        if (TCODConsole::root -> getChar(tmpPlrPos[0] - 1, tmpPlrPos[1]) != '#'){
+            if (TCODConsole::root -> getChar(tmpPlrPos[0] - 1, tmpPlrPos[1]) != 'o'){
+                TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] - 1, tmpPlrPos[1],colVec[0]);
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
+            }
+            else if ((TCODConsole::root -> getChar(tmpPlrPos[0] - 1, tmpPlrPos[1]) == 'o')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0] - 2, tmpPlrPos[1]) != '#')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0] - 2, tmpPlrPos[1]) != 'o')){
+                TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] - 1, tmpPlrPos[1],colVec[0]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                TCODConsole::root -> setChar(tmpPlrPos[0] - 2, tmpPlrPos[1], 'o');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] - 2, tmpPlrPos[1],colVec[2]);
+                tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
+            }
+        }
+        TCODConsole::root->flush();
+    }
+
+    else if ( key.vk == TCODK_DOWN ) {
+        if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 1) != '#'){
+            if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 1) != 'o'){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] + 1,colVec[0]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
+            }
+            else if ((TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 1) == 'o')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 2) != '#')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 2) != 'o')){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] + 1,colVec[0]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 2, 'o');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] + 2,colVec[2]);
+                tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
+            }
+        }
+        TCODConsole::root->flush();
+    }
+
+    else if ( key.vk == TCODK_RIGHT ) {
+        if (TCODConsole::root -> getChar(tmpPlrPos[0] + 1, tmpPlrPos[1]) != '#'){
+            if (TCODConsole::root -> getChar(tmpPlrPos[0] + 1, tmpPlrPos[1]) != 'o'){
+                TCODConsole::root -> setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] + 1, tmpPlrPos[1],colVec[0]);
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
+                tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
+            }
+
+            else if ((TCODConsole::root -> getChar(tmpPlrPos[0] + 1, tmpPlrPos[1]) == 'o')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0] + 2, tmpPlrPos[1]) != '#')
+                     && (TCODConsole::root -> getChar(tmpPlrPos[0] + 2, tmpPlrPos[1]) != 'o')){
+                TCODConsole::root -> setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '@');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] + 1, tmpPlrPos[1],colVec[0]);
+                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1], asd());
+                TCODConsole::root -> setChar(tmpPlrPos[0] + 2, tmpPlrPos[1], 'o');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] + 2, tmpPlrPos[1],colVec[2]);
+                tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
+            }
+        }
+        TCODConsole::root->flush();
+    }
+    turn++;
+    Score -= turn*10;
+
+    for (auto p : Num){
+        &Num.at(p)--;
+    if (Num.at(p) == 0)
+        TCODConsole::root->printEx(15,15, TCOD_BKGND_BURN, TCOD_CENTER, "You Lose", TCOD_COLOR_BLUE);
+        TCOD_console_is_window_closed();
+    }
+}
+
+bool ifWin(std::map<std::vector<int>,char>& mapOfWinPositions){
+    decltype(mapOfWinPositions.size()) winCnt = 0;
+    for (auto cross : mapOfWinPositions){
+        if (cross.second == 'o'){
+            winCnt++;
+        }
+    }
+    if (winCnt == mapOfWinPositions.size()) {
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::vector<int>& tmpPlrPos, std::map<std::vector<int>,char>& mapOfWinPositions){
+    TCODConsole::root->initRoot(Array.getDimX(), Array.getDimY(), "Friendly game!", false);
     TCODSystem::setFps(25);
-    //TCOD_console_from_file("home/andreas/CLionProjects/game_proj/Field.txt");
 
-    //TCOD_console_get_char_foreground(30, 30);
-    //TCODConsole::setWindowTitle(Game_of_hell);
-    //TCODConsole::root->setDefaultBackground(TCODColor::green);
-    //TCODConsole::root->setDefaultForeground(TCODColor::red);
-    //void TCOD_console_rect(30,30,20,20, true, TCOD_BKGND_BURN);
-    //TCOD_console_print_frame(30,30,20, true, TCOD_BKGND_BURN);
-    //TCOD_console_t *ptr = CON_W;
-    //Field::TCOD_console_set_default_background(ptr,);
-    while(1){
-        TCODConsole::flush();
-        //TCOD_key_t key = TCOD_console_wait_for_keypress('k');
+    std::unordered_map<size_t, size_t> maps;
+    (*maps).first
+    (*maps).second
+
+    TCODConsole::root->setDefaultBackground(asd());
+    TCODConsole::root->clear();
+    for (auto i = 0; i < Array.getDimY(); i++) {
+        for (auto j = 0; j < Array.getDimX(); j++) {
+            auto result = Array.getObjPos(i, j);
+            TCODConsole::root->setChar(j, i, result);
+        }
     }
 
-    return 0;
+    for (auto i = 0; i < Array.getDimY(); i++){
+        for (auto j = 0; j < Array.getDimX(); j++){
+            if (TCODConsole::root -> getChar(j, i) == '@'){
+                TCODConsole::root->setCharBackground(j,i,colVec[0]);
+                tmpPlrPos = {j,i};
+            }
+            else if (TCODConsole::root -> getChar(j, i) == '#'){
+                TCODConsole::root->setCharBackground(j,i,colVec[1]);
+            }
+            else if (TCODConsole::root -> getChar(j, i) == 'o'){
+                TCODConsole::root->setCharBackground(j,i,colVec[2]);
+               //N = (TCODConsole::root->getChar(j,i) == 'o');
+                //TCODConsole::root->setCharForeground(j,i,colNum());
+            }
+            else if (TCODConsole::root -> getChar(j, i) == 'x'){
+                TCODConsole::root->setCharBackground(j,i,colVec[3]);
+                mapOfWinPositions[{j,i}] = 'x';
+            }
+        }
     }
+    TCODConsole::root->flush();
+}

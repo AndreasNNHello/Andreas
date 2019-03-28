@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/game_proj.dir/main.cpp.o  -o game_proj  -L/home/andreas/Desktop/libtcod-1.5.1 -Wl,-rpath,/home/andreas/Desktop/libtcod-1.5.1 -ltcod -ltcodxx 
