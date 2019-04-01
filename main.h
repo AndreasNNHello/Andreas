@@ -35,9 +35,9 @@ public:
         _arr[posX][posY] = obj;
     }
 
-    void setboxPos(const unsigned posX, const unsigned posY, T obj) {
+    /*void setboxPos(const unsigned posX, const unsigned posY, T obj) {
         Box(_arr[posX][posY], n) = obj;
-    }
+    }*/
 
     char getObjPos (const unsigned posX, const unsigned posY) const{
         return _arr[posX][posY];
@@ -60,7 +60,7 @@ private:
     int _width, _height;
 };
 
-struct Box{
+/*struct Box{
 public:
     Box() = default;
     Box(char o): _box(o){
@@ -70,7 +70,7 @@ public:
 private:
     char _box;
     std::vector<int> _number;
-};
+};*/
 
 #endif GAME_PROJ_MAIN_H
 
