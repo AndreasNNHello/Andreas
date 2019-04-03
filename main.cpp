@@ -173,9 +173,12 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
     TCODConsole::root->print(1, 1, strtime.c_str());
     TCODConsole::root->flush();
 
+    auto count1 = std::find(newNum.begin(), newNum.end(), TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1));
+    auto count2 = std::find(newNum.begin(), newNum.end(), TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2));
+
     if ( key.vk == TCODK_UP  || rndmoves == 1 ) {
         if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) != '#'){
-            if (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) != pok){
+            if (count1 != newNum.end()){
                 TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '@');
                 TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[0]);
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[3]);
@@ -185,9 +188,9 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] - 1};
             }
 
-            else if ((TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1) == pok)
+            else if (count1 != newNum.end()
                      && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2) != '#')
-                     && (TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2) != pok)){
+                     && count2 != newNum.end()){
                 TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '@');
                 TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[0]);
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[3]);
@@ -349,6 +352,8 @@ void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::
 
     for (auto i = 0; i < Array.getDimY(); i++){
         for (auto j = 0; j < Array.getDimX(); j++){
+            auto count = std::find(newNum.begin(), newNum.end(), (TCODConsole::root -> getChar(j, i)));
+
             if (TCODConsole::root -> getChar(j, i) == '@'){
                 TCODConsole::root->setCharBackground(j,i,colVec[0]);
                 tmpPlrPos = {j,i};
@@ -356,7 +361,8 @@ void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::
             else if (TCODConsole::root -> getChar(j, i+2) == '#'){
                 TCODConsole::root->setCharBackground(j,i+2,colVec[1]);
             }
-            else if (TCODConsole::root -> getChar(j, i) == pok){
+//            else if (TCODConsole::root -> getChar(j, i) == pok){
+                else if (count != newNum.end()){
                 TCODConsole::root->setCharBackground(j,i,colVec[2]);
                 TCODConsole::root->setCharForeground(j,i,colNum());
             }
