@@ -60,17 +60,17 @@ private:
     int _width, _height;
 };
 
-/*struct Box{
+struct Coord{
 public:
-    Box() = default;
-    Box(char o): _box(o){
-       _number = new int[n];
-    };
+    int _i;
+    int _j;
+};
 
-private:
-    char _box;
-    std::vector<int> _number;
-};*/
+struct Box{
+public:
+    Coord _box;
+    char _num;
+};
 
 #endif GAME_PROJ_MAIN_H
 
