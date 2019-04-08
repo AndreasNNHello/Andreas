@@ -61,15 +61,14 @@ private:
 };
 
 struct Coord{
-public:
     int _i;
     int _j;
 };
 
 struct Box{
-public:
-    Coord _box;
-    char _num;
+    Coord _box; // coordinates
+    int _num; // char on box
+    bool _win;
 };
 
 #endif GAME_PROJ_MAIN_H

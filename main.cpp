@@ -77,14 +77,13 @@ char chArray[]= {'0','1','2','3','4','5','6','7','8','9',
                  'Y','Z'};
 char* pos = chArray;
 
-//bool WinPos(const std::vector<Box>& m);
+bool WinPos(const std::vector<Box>& m);
+int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m);
 int BoxPos(const std::vector<Box>& k, char t);
 char foo(const std::vector<Box>& x, char y);
 int LosePos(const std::vector<Box>& x);
-void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colourVec, int x, TCOD_key_t key);
-//void updateWinPositions(std::map<std::vector<int>,char>& mapOfWinPositions, const std::vector<TCODColor>& colVec);
-void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colourVec, std::vector<int>& tmpPlrPos, std::vector<int>& CharWin, int x);
-//bool ifWin(std::map<std::vector<int>,char>& mapOfWinPositions); std::map<std::vector<int>,char>& mapCharWin,
+void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colourVec, const std::vector<Coord>& CharWin, int x, TCOD_key_t key);
+void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colourVec, std::vector<int>& tmpPlrPos, std::vector<Coord>& CharWin, int x);
 void PrNM(int timer);
 
 int main() {
@@ -97,7 +96,7 @@ int main() {
     const TCODColor winCross{255, 255, 255};
     const std::vector<TCODColor> colourVec = {player, wall, box, winCross};
     //std::map<std::vector<int>, char> mapCharWin;
-    std::vector<int> CharWin;
+    std::vector<Coord> CharWin;
     std::vector<int> tempPlrPos;
     std::vector<int> Pth;
     int interval = 0;
@@ -109,12 +108,11 @@ int main() {
 
     TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);///waitForKeypress(true);
 
-    while (!newNum.empty() && (newNum.at(LosePos(newNum))._num != '0') ) {
-            //updateWinPositions(mapCharWin, colourVec);
+    while (!WinPos(newNum) && (newNum.at(LosePos(newNum))._num != '0') ) {
             sttime = TCODSystem::getElapsedSeconds();
             TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
             if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
-                Moving(tempPlrPos, colourVec, timer, key);
+                Moving(tempPlrPos, colourVec, CharWin, timer, key);
                 timer = interval + count - sttime;
                 interval = sttime;
             } else {
@@ -123,13 +121,22 @@ int main() {
             }
             if (timer == 0) {
                 rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-                Moving(tempPlrPos, colourVec, timer, key);
+                Moving(tempPlrPos, colourVec, CharWin, timer, key);
                 interval = sttime;
             }
             rndmoves = 0;
         }
 
     std::string yourScore = "Name: " + std::to_string(Score);
+
+    if(WinPos(newNum)) {
+        TCODConsole::initRoot(45, 45, "You win!", false, TCOD_RENDERER_GLSL);
+        TCODConsole::root->setDefaultBackground(asd());
+        TCODConsole::root->clear();
+        //TCODConsole::root->printEx(15,15, TCOD_BKGND_BURN, TCOD_CENTER, "Congratulation!", TCOD_COLOR_BLUE);
+        TCODConsole::root->print(5, 5, yourScore.c_str());
+        TCODConsole::root->flush();
+    }
 
             if (newNum.at(LosePos(newNum))._num == '0') {
                 //TCODConsole::root->setColorControl(TCOD_COLCTRL_1, TCODColor::red, TCODColor::black);
@@ -142,45 +149,16 @@ int main() {
                 TCODConsole::root->flush();
             }
 
-    if(newNum.empty()) {
-        TCODConsole::initRoot(arr.getDimX() + 15, arr.getDimY() + 15, "You win!", false, TCOD_RENDERER_GLSL);
-        TCODConsole::root->setDefaultBackground(asd());
-        TCODConsole::root->clear();
-        //TCODConsole::root->printEx(15,15, TCOD_BKGND_BURN, TCOD_CENTER, "Congratulation!", TCOD_COLOR_BLUE);
-        TCODConsole::root->print(5, 5, yourScore.c_str());
-        TCODConsole::root->flush();
-    }
-
     while(1){}
     return 0;
 }
 
-/*void updateWinPositions(std::map<std::vector<int>,char>& mapOfWinPositions, const std::vector<TCODColor>& colVec){
-    for (auto &cross : mapOfWinPositions) {
-        if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == '+') {
-            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[3]);
-            TCODConsole::root->setCharForeground(cross.first[0], cross.first[1], colNum());
-            cross.second = '+';
-        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == pok) {
-            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[2]);
-            TCODConsole::root->setCharForeground(cross.first[0], cross.first[1], colNum());
-            cross.second = pok;
-        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == '@') {
-            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[0]);
-            TCODConsole::root->setCharForeground(cross.first[0], cross.first[1], colVec[3]);
-            cross.second = '@';
-        } else if (TCODConsole::root->getChar(cross.first[0], cross.first[1]) == ' ') {
-            TCODConsole::root->setChar(cross.first[0], cross.first[1], '+');
-            TCODConsole::root->setCharBackground(cross.first[0], cross.first[1], colVec[3]);
-            TCODConsole::root->setCharForeground(cross.first[0], cross.first[1], colNum());
-        }
-    }
-}*/
-
-void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, int timer, TCOD_key_t key){
+void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key){
     std::string strtime = std::to_string(timer/60) + ":" + std::to_string(timer%60);
     TCODConsole::root->print(1, 1, strtime.c_str());
     TCODConsole::root->flush();
+
+    Box box;
 
     char tnp = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1);
     MyPred pred1(tnp);
@@ -268,6 +246,21 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                     TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1], asd());
                     tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] - 1};
                     --newNum[BoxPos(newNum, chBox)]._box._j;
+                    for (auto m : CharWin){
+                    if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1] - 1) == m._j ) {
+                        int p = BoxPos1(newNum, CharWin);
+                        newNum[p]._win = true;
+                    }
+                    }
+                    for (auto m : CharWin){
+                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
+                            int p = BoxPos(newNum, chBox);
+                            newNum[p]._win = false;
+                    TCODConsole::root->setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, newNum[p]._num);
+                    TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1, colVec[2]);
+                    TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] - 1, colNum());
+                }
+                    }
                 }
             } else {
                 TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '@');
@@ -277,13 +270,16 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] - 1};
+            }
+        }
+        for (auto k : CharWin) {
+            if(tmpPlrPos[0] == k._i && (tmpPlrPos[1] + 1) == k._j){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '+');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] + 1,colVec[3]);
+                TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] + 1,colNum());
+            }
+        }
 
-           }
-        }
-        if ( == '+'){
-            newNum.erase(chBox);
-            newNum.shrink_to_fit();
-        }
         TCODConsole::root->flush();
     }
 
@@ -303,6 +299,21 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] + 2,colNum());
                 tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
                 ++newNum[BoxPos(newNum, chBox3)]._box._j;
+                    for (auto m : CharWin){
+                        if (  tmpPlrPos[0] == m._i &&  (tmpPlrPos[1] + 1) == m._j ) {
+                            int p = BoxPos1(newNum, CharWin);
+                            newNum[p]._win = true;
+                        }
+                    }
+                    for (auto m : CharWin){
+                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
+                            int p = BoxPos(newNum, chBox3);
+                            newNum[p]._win = false;
+                            TCODConsole::root->setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, newNum[p]._num);
+                            TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] + 1, colVec[2]);
+                            TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] + 1, colNum());
+                        }
+                    }
             }
             }
             else {
@@ -313,7 +324,13 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
-
+            }
+        }
+        for (auto k : CharWin) {
+            if(tmpPlrPos[0] == k._i && (tmpPlrPos[1] - 1) == k._j){
+                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '+');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1] - 1,colVec[3]);
+                TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1] - 1,colNum());
             }
         }
         TCODConsole::root->flush();
@@ -335,6 +352,21 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                     TCODConsole::root->setCharForeground(tmpPlrPos[0] - 2, tmpPlrPos[1],colNum());
                     tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
                     --newNum[BoxPos(newNum, chBox5)]._box._i;
+                    for (auto m : CharWin){
+                        if (  (tmpPlrPos[0] - 1) == m._i &&  tmpPlrPos[1] == m._j ) {
+                            int p = BoxPos1(newNum, CharWin);
+                            newNum[p]._win = true;
+                        }
+                    }
+                    for (auto m : CharWin){
+                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
+                            int p = BoxPos(newNum, chBox5);
+                            newNum[p]._win = false;
+                            TCODConsole::root->setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], newNum[p]._num);
+                            TCODConsole::root->setCharBackground(tmpPlrPos[0] - 1, tmpPlrPos[1], colVec[2]);
+                            TCODConsole::root->setCharForeground(tmpPlrPos[0] - 1, tmpPlrPos[1], colNum());
+                        }
+                    }
                 }
             }
             else {
@@ -345,6 +377,13 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 TCODConsole::root->setCharBackground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 TCODConsole::root->setCharForeground(tmpPlrPos[0], tmpPlrPos[1],asd());
                 tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
+            }
+        }
+        for (auto k : CharWin) {
+            if((tmpPlrPos[0] + 1) == k._i && tmpPlrPos[1] == k._j){
+                TCODConsole::root -> setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '+');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] + 1, tmpPlrPos[1],colVec[3]);
+                TCODConsole::root->setCharForeground(tmpPlrPos[0] + 1, tmpPlrPos[1],colNum());
             }
         }
         TCODConsole::root->flush();
@@ -366,6 +405,21 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 TCODConsole::root->setCharForeground(tmpPlrPos[0] + 2, tmpPlrPos[1], colNum());
                 tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
                 ++newNum[BoxPos(newNum, chBox7)]._box._i;
+                    for (auto m : CharWin){
+                        if ((tmpPlrPos[0] + 1) == m._i && tmpPlrPos[1] == m._j ) {
+                            int p = BoxPos1(newNum, CharWin);
+                            newNum[p]._win = true;
+                        }
+                    }
+                    for (auto m : CharWin){
+                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
+                            int p = BoxPos(newNum, chBox7);
+                            newNum[p]._win = false;
+                            TCODConsole::root->setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], newNum[p]._num);
+                            TCODConsole::root->setCharBackground(tmpPlrPos[0] + 1, tmpPlrPos[1], colVec[2]);
+                            TCODConsole::root->setCharForeground(tmpPlrPos[0] + 1, tmpPlrPos[1], colNum());
+                        }
+                    }
             }
             }
             else {
@@ -378,47 +432,43 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, i
                 tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
             }
         }
+        for (auto k : CharWin) {
+            if((tmpPlrPos[0] - 1) == k._i && tmpPlrPos[1] == k._j){
+                TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '+');
+                TCODConsole::root->setCharBackground(tmpPlrPos[0] - 1, tmpPlrPos[1],colVec[3]);
+                TCODConsole::root->setCharForeground(tmpPlrPos[0] - 1, tmpPlrPos[1],colNum());
+            }
+        }
+        TCODConsole::root->flush();
     }
     k=0;
     turn++;
     Score = 700-turn*10;
 
-    for(auto &num : newNum){
-        num._num = pos[--Num[k++]-1];
-       TCODConsole::root->setChar(num._box._i, num._box._j, num._num);
+    for(auto num = newNum.begin() ; num != newNum.end(); num++){
+        if (num->_win == false){
+        num->_num = pos[--(Num[k++]-1)];
+        }
+       TCODConsole::root->setChar(num->_box._i, num->_box._j, num->_num);
     }
         TCODConsole::root->flush();
 }
 
     char foo(const std::vector<Box>& x, char y){
-    for (auto &n : newNum){
+    for (auto &n : x){
             if (n._num == y){
                 return n._num;
             }
         }
     }
 
-/*bool ifWin(std::map<std::vector<int>,char>& mapOfWinPositions){
-    decltype(mapOfWinPositions.size()) winCnt = 0;
-    for (auto cross : mapOfWinPositions){
-        if (cross.second == pok){
-            winCnt++;
-        }
-    }
-    if (winCnt == mapOfWinPositions.size()) {
-        return true;
-    }
-    else{
-        return false;
-    }
-}*/
-//std::map<std::vector<int>,char>& mapOfWinPositions,
-void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::vector<int>& tmpPlrPos, std::vector<int>& CharWin, int timer){
+void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::vector<int>& tmpPlrPos, std::vector<Coord>& CharWin, int timer){
     TCODConsole::root->initRoot(Array.getDimX(), Array.getDimY()+2, "Friendly game!", false);
     TCODSystem::setFps(25);
 
     k=0;
     Box box;
+    Coord chWin;
 
     std::string strtime = std::to_string(timer/60) + ":" + std::to_string(timer%60);
 
@@ -437,6 +487,7 @@ void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::
                 box._win = false;
                 newNum.emplace_back(box);
                 result = box._num;
+
             }
                 TCODConsole::root->setChar(j, i+2, result);
         }
@@ -460,11 +511,12 @@ void PaintMap(TwoArray<char>& Array, const std::vector<TCODColor>& colVec, std::
             else if (TCODConsole::root -> getChar(j, i+2) == '#'){
                 TCODConsole::root->setCharBackground(j,i+2,colVec[1]);
             }
-            //else if (TCODConsole::root -> getChar(j, i) == box._num){
             else if (TCODConsole::root -> getChar(j, i) == '+'){
                 TCODConsole::root->setCharBackground(j,i,colVec[3]);
                 TCODConsole::root->setCharForeground(j,i,colNum());
-                CharWin = {j,i};
+                chWin._i = j;
+                chWin._j = i;
+                CharWin.emplace_back(chWin);
             }
         }
     }
@@ -496,12 +548,23 @@ int LosePos(const std::vector<Box>& x) {
 
 int BoxPos(const std::vector<Box>& k, char t) {
     for (auto i = 0; i < newNum.size(); i++) {
-        if (newNum.at(i)._num == t)
+        if (k[i]._num == t)
             return i;
     }
 }
 
-/*bool WinPos(const std::vector<Box>& m){
+int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m) {
+    for (auto pos = 0; pos < newNum.size(); pos++) {
+        for (auto p : m){
+            if(k[pos]._win != true){
+        if ( k[pos]._box._i == p._i && k[pos]._box._j == p._j)
+            return pos;
+    }
+        }
+    }
+}
+
+bool WinPos(const std::vector<Box>& m){
     int sw = 0;
     for (auto &s : newNum){
         if (s._win == true) {
@@ -513,4 +576,4 @@ int BoxPos(const std::vector<Box>& k, char t) {
         } else {
             return  false;
         }
-}*/
+}
