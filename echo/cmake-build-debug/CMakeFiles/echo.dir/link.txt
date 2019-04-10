@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/echo.dir/server.cpp.o  -o echo 
+/usr/bin/c++  -g   CMakeFiles/echo.dir/server.cpp.o  -o echo  -L/home/andreas/Desktop/libtcod-1.5.1 -Wl,-rpath,/home/andreas/Desktop/libtcod-1.5.1 -ltcod -ltcodxx 

@@ -7,23 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/andreas/CLionProjects/echoClient/main.cpp
-stdio.h
--
-stdlib.h
--
-arpa/inet.h
--
-fcntl.h
--
-netdb.h
--
-netinet/in.h
--
-sys/stat.h
--
 sys/socket.h
--
-unistd.h
 -
 sys/types.h
 -
@@ -45,14 +29,6 @@ arpa/inet.h
 -
 sys/socket.h
 -
-sys/socket.h
--
-stdlib.h
--
-netinet/in.h
--
-string.h
--
-unistd.h
+iostream
 -
 
