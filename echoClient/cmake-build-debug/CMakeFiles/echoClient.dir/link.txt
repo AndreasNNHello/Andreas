@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/echoClient.dir/main.cpp.o  -o echoClient 
+/usr/bin/c++  -g   CMakeFiles/echoClient.dir/Client.cpp.o  -o echoClient 

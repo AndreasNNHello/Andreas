@@ -3,4 +3,4 @@ project(echoClient)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(echoClient main.cpp)
+add_executable(echoClient Client.cpp)

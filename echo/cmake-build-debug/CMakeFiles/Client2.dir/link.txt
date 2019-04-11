@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Client2.dir/Client2.cpp.o  -o Client2  -L/home/andreas/Desktop/libtcod-1.5.1 -Wl,-rpath,/home/andreas/Desktop/libtcod-1.5.1 -ltcod -ltcodxx 

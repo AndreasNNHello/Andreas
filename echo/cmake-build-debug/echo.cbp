@@ -27,6 +27,64 @@
 					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Client2">
+				<Option output="/home/andreas/CLionProjects/echo/cmake-build-debug/Client2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 Client2"/>
+					<CompileFile command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Client2/fast">
+				<Option output="/home/andreas/CLionProjects/echo/cmake-build-debug/Client2" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 Client2/fast"/>
+					<CompileFile command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
 			<Target title="echo">
 				<Option output="/home/andreas/CLionProjects/echo/cmake-build-debug/echo" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
@@ -34,7 +92,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
 					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
@@ -56,7 +116,9 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
 					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
 					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
@@ -71,17 +133,61 @@
 					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="edit_cache">
+			<Target title="Client">
+				<Option output="/home/andreas/CLionProjects/echo/cmake-build-debug/Client" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
-				<Option type="4"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 Client"/>
+					<CompileFile command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="Client/fast">
+				<Option output="/home/andreas/CLionProjects/echo/cmake-build-debug/Client" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug"/>
+					<Add directory="/home/andreas/Desktop/libtcod-1.5.1/include"/>
+					<Add directory="/home/andreas/CLionProjects/echo/cmake-build-debug/Maps"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 Client/fast"/>
 					<CompileFile command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/gmake -f &quot;/home/andreas/CLionProjects/echo/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/andreas/CLionProjects/echo/Client.cpp">
+			<Option target="Client"/>
+		</Unit>
+		<Unit filename="/home/andreas/CLionProjects/echo/Client2.cpp">
+			<Option target="Client2"/>
+		</Unit>
 		<Unit filename="/home/andreas/CLionProjects/echo/server.cpp">
 			<Option target="echo"/>
 		</Unit>

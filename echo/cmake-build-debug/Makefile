@@ -56,17 +56,6 @@ CMAKE_BINARY_DIR = /home/andreas/CLionProjects/echo/cmake-build-debug
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/andreas/Desktop/clion-2018.3.2/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
-
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -77,6 +66,17 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/home/andreas/Desktop/clion-2018.3.2/bin/cmake/linux/bin/cmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -111,17 +111,97 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named echo
+# Target rules for targets named Client2
 
 # Build rule for target.
-echo: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 echo
-.PHONY : echo
+Client2: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Client2
+.PHONY : Client2
 
 # fast build rule for target.
-echo/fast:
-	$(MAKE) -f CMakeFiles/echo.dir/build.make CMakeFiles/echo.dir/build
-.PHONY : echo/fast
+Client2/fast:
+	$(MAKE) -f CMakeFiles/Client2.dir/build.make CMakeFiles/Client2.dir/build
+.PHONY : Client2/fast
+
+#=============================================================================
+# Target rules for targets named server
+
+# Build rule for target.
+server: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 server
+.PHONY : server
+
+# fast build rule for target.
+server/fast:
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/build
+.PHONY : server/fast
+
+#=============================================================================
+# Target rules for targets named Client
+
+# Build rule for target.
+Client: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Client
+.PHONY : Client
+
+# fast build rule for target.
+Client/fast:
+	$(MAKE) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/build
+.PHONY : Client/fast
+
+Client.o: Client.cpp.o
+
+.PHONY : Client.o
+
+# target to build an object file
+Client.cpp.o:
+	$(MAKE) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.o
+.PHONY : Client.cpp.o
+
+Client.i: Client.cpp.i
+
+.PHONY : Client.i
+
+# target to preprocess a source file
+Client.cpp.i:
+	$(MAKE) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.i
+.PHONY : Client.cpp.i
+
+Client.s: Client.cpp.s
+
+.PHONY : Client.s
+
+# target to generate assembly for a file
+Client.cpp.s:
+	$(MAKE) -f CMakeFiles/Client.dir/build.make CMakeFiles/Client.dir/Client.cpp.s
+.PHONY : Client.cpp.s
+
+Client2.o: Client2.cpp.o
+
+.PHONY : Client2.o
+
+# target to build an object file
+Client2.cpp.o:
+	$(MAKE) -f CMakeFiles/Client2.dir/build.make CMakeFiles/Client2.dir/Client2.cpp.o
+.PHONY : Client2.cpp.o
+
+Client2.i: Client2.cpp.i
+
+.PHONY : Client2.i
+
+# target to preprocess a source file
+Client2.cpp.i:
+	$(MAKE) -f CMakeFiles/Client2.dir/build.make CMakeFiles/Client2.dir/Client2.cpp.i
+.PHONY : Client2.cpp.i
+
+Client2.s: Client2.cpp.s
+
+.PHONY : Client2.s
+
+# target to generate assembly for a file
+Client2.cpp.s:
+	$(MAKE) -f CMakeFiles/Client2.dir/build.make CMakeFiles/Client2.dir/Client2.cpp.s
+.PHONY : Client2.cpp.s
 
 server.o: server.cpp.o
 
@@ -129,7 +209,7 @@ server.o: server.cpp.o
 
 # target to build an object file
 server.cpp.o:
-	$(MAKE) -f CMakeFiles/echo.dir/build.make CMakeFiles/echo.dir/server.cpp.o
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server.cpp.o
 .PHONY : server.cpp.o
 
 server.i: server.cpp.i
@@ -138,7 +218,7 @@ server.i: server.cpp.i
 
 # target to preprocess a source file
 server.cpp.i:
-	$(MAKE) -f CMakeFiles/echo.dir/build.make CMakeFiles/echo.dir/server.cpp.i
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server.cpp.i
 .PHONY : server.cpp.i
 
 server.s: server.cpp.s
@@ -147,7 +227,7 @@ server.s: server.cpp.s
 
 # target to generate assembly for a file
 server.cpp.s:
-	$(MAKE) -f CMakeFiles/echo.dir/build.make CMakeFiles/echo.dir/server.cpp.s
+	$(MAKE) -f CMakeFiles/server.dir/build.make CMakeFiles/server.dir/server.cpp.s
 .PHONY : server.cpp.s
 
 # Help Target
@@ -156,9 +236,17 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... echo"
 	@echo "... edit_cache"
+	@echo "... Client2"
+	@echo "... rebuild_cache"
+	@echo "... server"
+	@echo "... Client"
+	@echo "... Client.o"
+	@echo "... Client.i"
+	@echo "... Client.s"
+	@echo "... Client2.o"
+	@echo "... Client2.i"
+	@echo "... Client2.s"
 	@echo "... server.o"
 	@echo "... server.i"
 	@echo "... server.s"

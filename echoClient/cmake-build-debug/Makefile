@@ -123,32 +123,32 @@ echoClient/fast:
 	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/build
 .PHONY : echoClient/fast
 
-main.o: main.cpp.o
+Client.o: Client.cpp.o
 
-.PHONY : main.o
+.PHONY : Client.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/main.cpp.o
-.PHONY : main.cpp.o
+Client.cpp.o:
+	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/Client.cpp.o
+.PHONY : Client.cpp.o
 
-main.i: main.cpp.i
+Client.i: Client.cpp.i
 
-.PHONY : main.i
+.PHONY : Client.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/main.cpp.i
-.PHONY : main.cpp.i
+Client.cpp.i:
+	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/Client.cpp.i
+.PHONY : Client.cpp.i
 
-main.s: main.cpp.s
+Client.s: Client.cpp.s
 
-.PHONY : main.s
+.PHONY : Client.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/main.cpp.s
-.PHONY : main.cpp.s
+Client.cpp.s:
+	$(MAKE) -f CMakeFiles/echoClient.dir/build.make CMakeFiles/echoClient.dir/Client.cpp.s
+.PHONY : Client.cpp.s
 
 # Help Target
 help:
@@ -159,9 +159,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... echoClient"
 	@echo "... edit_cache"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
+	@echo "... Client.o"
+	@echo "... Client.i"
+	@echo "... Client.s"
 .PHONY : help
 
 

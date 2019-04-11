@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/andreas/Desktop/libtcod-1.5.1/include 
+CXX_INCLUDES = -I/home/andreas/CLionProjects/echo/cmake-build-debug -I/home/andreas/Desktop/libtcod-1.5.1/include -I/home/andreas/CLionProjects/echo/cmake-build-debug/Maps 
 

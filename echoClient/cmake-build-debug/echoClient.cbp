@@ -80,7 +80,7 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/andreas/CLionProjects/echoClient/main.cpp">
+		<Unit filename="/home/andreas/CLionProjects/echoClient/Client.cpp">
 			<Option target="echoClient"/>
 		</Unit>
 		<Unit filename="/home/andreas/CLionProjects/echoClient/CMakeLists.txt">
