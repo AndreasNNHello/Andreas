@@ -182,6 +182,11 @@
 		<Unit filename="/home/andreas/CLionProjects/echo/Client2.cpp">
 			<Option target="Client2"/>
 		</Unit>
+		<Unit filename="/home/andreas/CLionProjects/echo/game_proj.h">
+			<Option target="Client2"/>
+			<Option target="server"/>
+			<Option target="Client"/>
+		</Unit>
 		<Unit filename="/home/andreas/CLionProjects/echo/server.cpp">
 			<Option target="server"/>
 		</Unit>

@@ -88,36 +88,6 @@ private:
     char _x;
 };
 
-TCODColor asd(){
-    TCODColor color(100,10,200);
-    return color;
-}
-
-TCODColor colNum(){
-    TCODColor color(0,0,0);
-    return color;
-}
-
-TCODColor colWinPos(){
-    TCODColor color(240,240,240);
-    return color;
-}
-
-TCODColor colPlayer(){
-    TCODColor color(0,250,0);
-    return color;
-}
-
-TCODColor colBox(){
-    TCODColor color(0,0,250);
-    return color;
-}
-
-TCODColor colWall(){
-    TCODColor color(255,0,0);
-    return color;
-}
-
 #endif GAME_PROJ_MAIN_H
 
 

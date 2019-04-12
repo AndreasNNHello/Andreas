@@ -8,9 +8,9 @@ include_directories(/home/andreas/Desktop/libtcod-1.5.1/include/)
 
 link_directories(/home/andreas/Desktop/libtcod-1.5.1)
 
-add_executable(server server.cpp)
-add_executable(Client Client.cpp)
-add_executable(Client2 Client2.cpp)
+add_executable(server server.cpp game_proj.h)
+add_executable(Client Client.cpp game_proj.h)
+add_executable(Client2 Client2.cpp game_proj.h)
 
 target_link_libraries(server -ltcod -ltcodxx)
 target_link_libraries(Client -ltcod -ltcodxx)
