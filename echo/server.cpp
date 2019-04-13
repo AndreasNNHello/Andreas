@@ -20,14 +20,14 @@
 #include <map>
 #include <algorithm>
 
-
+void func(int x, struct sockaddr *cl_addr, std::string map);
 std::string RandMap(const std::map<int, std::string> &x);
 void *get_approp_addr(struct sockaddr *sock_a);
 void SendMap(std::string map, int sock, char *buf);
-char foo(const std::vector<Box>& x, char y);
-int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m);
-int BoxPos(const std::vector<Box>& k, char t);
-void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key);
+//char foo(const std::vector<Box>& x, char y);
+//int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m);
+//int BoxPos(const std::vector<Box>& k, char t);
+void Moving(char *buf, int x, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key);
 
 int main() {
     int sock, newsock1, newsock2, sz, rndmap;
@@ -35,8 +35,8 @@ int main() {
     struct sockaddr *cp;
     struct hostent *rhost;
     char *host;
-    char buf[1024] = {0};
-    char buf1[1024] = {0};
+
+
     char buf2[1024] = {0};
     char address_pres[INET6_ADDRSTRLEN];
     std::string nameMap;
@@ -52,7 +52,6 @@ int main() {
     const TCODColor winCross{255, 255, 255};
     const std::vector<TCODColor> colourVec = {player, wall, box, winCross};
     std::vector<Coord> CharWin;
-    std::vector<int> tempPlrPos;
 
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -74,7 +73,7 @@ int main() {
         perror("listen");
     }
 
-    while (1) {
+
 
         int n = -1;
         std::string it;
@@ -99,77 +98,105 @@ int main() {
         maps.erase(0);
         std::string tmp2 = "Maps/" + RandMap(maps);
 
-        std::ifstream in(tmp2);
-        printf("\nHi,Iam running server.Some Client hit me\n");
-        newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
 
-        if (newsock1 == -1) {
-            perror("no accept Cl1");
-        }
+    newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
+    newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
 
-        inet_ntop(cl_addr.sin_family,
-                  get_approp_addr((struct sockaddr *) &cl_addr),
-                  address_pres, sizeof address_pres);
-        printf("server: Client1 connection from %s\n", address_pres);
+   /*printf("\nHi,Iam running server.Some Client hit me\n");
 
-        if ((recv(newsock1, (char *) &buf2, SIZE_MAX, 0)) == -1) {
-            perror("Client1 doesn't want starting play");
-        } else {
-            if (buf2[0] == 'T') {
-                TCOD_key_t key;
-                int timer;
-                switch(buf2[6]){
-                    case 'U':
-                        key.vk = TCODK_UP;
-                        break;
-                    case 'D':
-                        key.vk = TCODK_DOWN;
-                        break;
-                    case 'L':
-                        key.vk = TCODK_LEFT;
-                        break;
-                    case 'R':
-                        key.vk = TCODK_RIGHT;
-                        break;
-                    default:
-                        continue;
-                }
-                Moving(tempPlrPos, colourVec, CharWin, timer, key);
-            } else if (buf2[0] == 's') {
-                    SendMap(tmp2, newsock1, buf);
-                    printf("Map message sent\n");
-                }
-        }
+   newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
 
+   if (newsock2 == -1) {
+       perror("no accept Cl2");
+   }
 
-        printf("\nHi,Iam running server.Some Client hit me\n");
+   inet_ntop(cl_addr.sin_family,
+             get_approp_addr((struct sockaddr *) &cl_addr),
+             address_pres, sizeof address_pres);
+   printf("server: Client2 connection from %s\n", address_pres);
 
-        newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
+   if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
+       perror("Client2 doesn't want starting play");
+   } else {
+       if (buf2[0] == 's') {
+           SendMap(tmp2, newsock2, buf);
+           printf("Map message sent\n");
+       }
+   }*/
+    printf("\nHi,Iam running server.Some Client hit me\n");
+    func(newsock1, (sockaddr *) &cl_addr, tmp2);
+    printf("\nHi,Iam running server.Some Client hit me\n");
+    func(newsock2, (sockaddr *) &cl_addr, tmp2);
 
-        if (newsock2 == -1) {
-            perror("no accept Cl2");
-        }
+    while (1) {
 
-        inet_ntop(cl_addr.sin_family,
-                  get_approp_addr((struct sockaddr *) &cl_addr),
-                  address_pres, sizeof address_pres);
-        printf("server: Client2 connection from %s\n", address_pres);
-
-        if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
-            perror("Client2 doesn't want starting play");
-        } else {
-            if (buf2[0] == 's') {
-                SendMap(tmp2, newsock2, buf);
-                printf("Map message sent\n");
-            }
-        }
     }
     return 0;
 }
+
+void func(int x, struct sockaddr *cl_addr, std::string map){
+    char buf[1024] = {0};
+    char buf1[1024] = {0};
+    std::ifstream in(map);
+    int firstPlrPos, secondPlrPos;
+
+    //printf("\nHi,Iam running server.Some Client hit me\n");
+
+
+    if (x == -1) {
+        perror("no accept Cl1");
+    }
+
+    inet_ntop(cl_addr->sa_family,
+              get_approp_addr((struct sockaddr *) &cl_addr),
+              address_pres, sizeof address_pres);
+    printf("server: Client1 connection from %s\n", address_pres);
+
+    if ((recv(x, (char *) &buf1, SIZE_MAX, 0)) == -1) {
+        perror("Client1 doesn't want starting play");
+    } else {
+        if (buf1[0] == '1') {
+            TCOD_key_t key;
+            int timer;
+            switch (buf1[1]) {
+                case '4':
+                    key.vk = TCODK_UP;
+                    break;
+                case '7':
+                    key.vk = TCODK_DOWN;
+                    break;
+                case '5':
+                    key.vk = TCODK_LEFT;
+                    break;
+                case '6':
+                    key.vk = TCODK_RIGHT;
+                    break;
+                default:
+                    continue;
+            }
+
+            for (int i = 6; i < x; i++)
+                if (buf[i] == '@') {
+                    firstPlrPos = i;
+                } else if (buf[i] == '$') {
+                    secondPlrPos = i;
+                }
+
+            Moving(buf, firstPlrPos, colourVec, CharWin, timer, key);
+            send(sock, buf, strlen(buf), 0);
+        } else if (buf1[0] == 's') {
+            SendMap(tmp2, x, buf);
+            //SendMap(tmp2, newsock2, buf);
+            printf("Map message sent\n");
+        }
+    }
+
+}
+
 std::string RandMap(const std::map<int, std::string> &x)
 {
     std::string tmp;
-    int rndmap = TCODRandom::getInstance()->getInt((x.begin()->first)-1, x.size()-1, 5);
+    int rndmap = TCODRandom::getInstance()->getInt((x.begin()->first) - 1, x.size() - 1, 0);
     for (auto p : x) {
         if (p.first == (rndmap+1)){
             tmp = p.second;
@@ -210,12 +237,13 @@ char chArray[]= {'0','1','2','3','4','5','6','7','8','9',
                  'Y','Z'};
 char* pos = chArray;
 
-void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key){
+void Moving(char *buf, int x, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key){
     std::string strtime = std::to_string(timer/60) + ":" + std::to_string(timer%60);
     TCODConsole::root->print(1, 1, strtime.c_str());
     TCODConsole::root->flush();
-
-    Box box;
+    int h = std::atoi(&buf[0]);
+    int w = std::atoi(&buf[3]);
+    /*Box box;
 
     char tnp = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1);
     MyPred pred1(tnp);
@@ -285,10 +313,14 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, c
         } else if (count7 != newNum.end() && count8 != newNum.end()){
             rndmoves = TCODRandom::getInstance()->getInt(1, 3, 0);
         }
-    }
-
+    }*/
+    char  tmp;
     if ( key.vk == TCODK_UP  || rndmoves == 1 ) {
-        if (tnp != '#') {
+       buf[x] = tmp;
+       buf[x] = buf[x-w];
+       buf[x-w] = tmp;
+       x -= w;
+        /*if (tnp != '#') {
             if (count1 != newNum.end()) {
                 if (tnp2 == '#' || (count2 != newNum.end())) {}
                 else{
@@ -320,13 +352,15 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, c
                 TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '+');
 
             }
-        }
-
-        TCODConsole::root->flush();
+        }*/
     }
 
     else if ( key.vk == TCODK_DOWN  || rndmoves == 2 ) {
-        if (tnp3 != '#'){
+        buf[x] = tmp;
+        buf[x] = buf[x+w];
+        buf[x+w] = tmp;
+        x += w;
+        /*if (tnp3 != '#'){
             if (count3 != newNum.end()){
                 if (tnp4 == '#' || (count4 != newNum.end())){}
                 else {
@@ -367,12 +401,15 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, c
                 TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '+');
 
             }
-        }
-        TCODConsole::root->flush();
+        }*/
     }
 
     else if ( key.vk == TCODK_LEFT || rndmoves == 3 ) {
-        if (tnp5 != '#'){
+        buf[x] = tmp;
+        buf[x] = buf[x-1];
+        buf[x-1] = tmp;
+        x -= 1;
+        /*if (tnp5 != '#'){
             if (count5 != newNum.end()){
                 if (tnp6 == '#' || (count6 != newNum.end())){}
                 else {
@@ -413,12 +450,15 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, c
                 TCODConsole::root -> setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '+');
 
             }
-        }
-        TCODConsole::root->flush();
+        }*/
     }
 
     else if ( key.vk == TCODK_RIGHT  || rndmoves == 4) {
-        if (tnp7 != '#') {
+        buf[x] = tmp;
+        buf[x] = buf[x+1];
+        buf[x+1] = tmp;
+        x += 1;
+       /* if (tnp7 != '#') {
             if (count7 != newNum.end()){
                 if (tnp8 == '#' || (count8 != newNum.end())){}
                 else {
@@ -459,22 +499,23 @@ void Moving(std::vector<int>& tmpPlrPos, const std::vector<TCODColor>& colVec, c
 
             }
         }
-        TCODConsole::root->flush();
-    }
+    }*/
     int k=0;
     turn++;
     Score = 700-turn*10;
 
-    for(auto num = newNum.begin() ; num != newNum.end(); num++){
+    /*for(auto num = newNum.begin() ; num != newNum.end(); num++){
         if (num->_win == false){
             num->_num = pos[--Num[k++]-1];
         }
         TCODConsole::root->setChar(num->_box._i, num->_box._j, num->_num);
     }
     TCODConsole::root->flush();
+}*/
+}
 }
 
-char foo(const std::vector<Box>& x, char y){
+/*char foo(const std::vector<Box>& x, char y){
     for (auto &n : x){
         if (n._num == y){
             return n._num;
@@ -498,4 +539,4 @@ int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m) {
             }
         }
     }
-}
+}*/

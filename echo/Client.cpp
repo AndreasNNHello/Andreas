@@ -61,19 +61,16 @@ void Paint(int z, char *c , int p){
         perror("error");
     } else {
         int w,h;
-        int y = 2;
-        int x = 0;
         int i = 6;
-        w = (std::atoi(&c[0]) + std::atoi(&c[1]));
-        h = (std::atoi(&c[3]) + std::atoi(&c[4]));
-        TCODConsole::root->initRoot(w-2, h-2, "Cl1", false);
+        h = std::atoi(&c[0]);
+        w = std::atoi(&c[3]);
+        TCODConsole::root->initRoot(w, h+2, "Cl1", false);
         TCODConsole::root->setDefaultBackground(asd());
         TCODConsole::root->clear();
 
         TCODConsole::root->flush();
-        for (auto y = 2; y < h; y++) {
-            for (auto x = 0; x < w-2; x++) {
-
+        for (auto y = 2; y < h+2; y++) {
+            for (auto x = 0; x < w; x++) {
                 //for (auto i=6; i< newclsock; i++) {
                 if (c[i] == '\n'){
                     i++;
@@ -81,6 +78,11 @@ void Paint(int z, char *c , int p){
                 }else{
                     switch (c[i]){
                         case '@':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colPlayer());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        case '$':
                             TCODConsole::root->setChar(x, y, c[i++]);
                             TCODConsole::root->setCharBackground(x, y, colPlayer());
                             TCODConsole::root->setCharForeground(x, y, colNum());
@@ -107,8 +109,6 @@ void Paint(int z, char *c , int p){
                             break;
                     }
 
-                    //y++;
-                    //x++;
                     TCODConsole::root->flush();
                 }
                 //}
@@ -134,7 +134,6 @@ void GiveMeMap(int x) {
 void GiveMeNewMap(TCOD_key_t k, int x) {
     char buf1[SIZE_MAX];
     std::string mail;
-    mail = "start";
     mail = std::to_string(k.vk);
     std::strcpy(buf1, mail.c_str());
     send(x, (char *) &buf1, sizeof(buf1), 0);

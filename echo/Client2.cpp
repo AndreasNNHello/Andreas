@@ -12,26 +12,14 @@
 #include <iostream>
 #include <cstring>
 #include <libtcod.hpp>
+#include "game_proj.h"
 
 #define SIZE_MAX 1024
 
-TCODColor asd(){
-    TCODColor color(100,10,200);
-    return color;
-}
-
-TCODColor colNum(){
-    TCODColor color(0,0,0);
-    return color;
-}
-
-TCODColor colCh(){
-    TCODColor color(255,0,0);
-    return color;
-}
 
 void Paint(int z, char *c , int p);
 void GiveMeMap(int x);
+void GiveMeNewMap(TCOD_key_t k, int x);
 
 int main() {
     int clsock, newclsock;
@@ -50,9 +38,18 @@ int main() {
         perror("not connection");
     }
 
+    GiveMeMap(clsock);
+    Paint(newclsock, buff, clsock);
+
     while(1){
-        GiveMeMap(clsock);
-        Paint(newclsock, buff, clsock);
+        TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+        if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT){
+            GiveMeNewMap(key, clsock);
+            Paint(newclsock, buff, clsock);
+        }else{
+            GiveMeMap(clsock);
+            Paint(newclsock, buff, clsock);
+        }
     }
 
     return 0;
@@ -64,29 +61,54 @@ void Paint(int z, char *c , int p){
         perror("error");
     } else {
         int w,h;
-        int y = 2;
-        int x = 0;
         int i = 6;
-        w = (std::atoi(&c[0]) + std::atoi(&c[1]));
-        h = (std::atoi(&c[3]) + std::atoi(&c[4]));
-        TCODConsole::root->initRoot(w-2, h-2, "Cl2", false);
+        h = std::atoi(&c[0]);
+        w = std::atoi(&c[3]);
+        TCODConsole::root->initRoot(w, h+2, "Cl2", false);
         TCODConsole::root->setDefaultBackground(asd());
         TCODConsole::root->clear();
 
         TCODConsole::root->flush();
-        for (auto y = 2; y < h-2; y++) {
-            for (auto x = 0; x < w-2; x++) {
-
+        for (auto y = 2; y < h+2; y++) {
+            for (auto x = 0; x < w; x++) {
                 //for (auto i=6; i< newclsock; i++) {
                 if (c[i] == '\n'){
                     i++;
                     x--;
                 }else{
-                    TCODConsole::root->setChar(x, y, c[i++]);
-                    TCODConsole::root->setCharBackground(x, y, colCh());
-                    TCODConsole::root->setCharForeground(x, y, colNum());
-                    //y++;
-                    //x++;
+                    switch (c[i]){
+                        case '@':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colPlayer());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        case '$':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colPlayer());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        case '+':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colWinPos());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        case '#':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colWall());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        case 'o':
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, colBox());
+                            TCODConsole::root->setCharForeground(x, y, colNum());
+                            break;
+                        default:
+                            TCODConsole::root->setChar(x, y, c[i++]);
+                            TCODConsole::root->setCharBackground(x, y, asd());
+                            TCODConsole::root->setCharForeground(x, y, asd());
+                            break;
+                    }
+
                     TCODConsole::root->flush();
                 }
                 //}
@@ -105,6 +127,14 @@ void GiveMeMap(int x) {
 
     std::string mail;
     mail = "start";
+    std::strcpy(buf1, mail.c_str());
+    send(x, (char *) &buf1, sizeof(buf1), 0);
+}
+
+void GiveMeNewMap(TCOD_key_t k, int x) {
+    char buf1[SIZE_MAX];
+    std::string mail;
+    mail = std::to_string(k.vk);
     std::strcpy(buf1, mail.c_str());
     send(x, (char *) &buf1, sizeof(buf1), 0);
 }
