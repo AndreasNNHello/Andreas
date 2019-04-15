@@ -6,8 +6,10 @@
 #include <libtcod.h>
 #include <libtcod.hpp>
 #include <ostream>
-
-//TCOD_key_t key = TCODConsole::waitForKeypress(true);
+#include <stdio.h>
+#include <stdlib.h>
+#include <cstring>
+#include <map>
 
 
 template <typename T> class TwoArray {
@@ -61,21 +63,21 @@ private:
     int _width, _height;
 };
 
-struct Coord{
+/*struct Coord{
     int _i;
     int _j;
-};
+};*/
 
 struct Box{
-    Coord _box; // coordinates
-    int _num; // char on box
+    int _box; // coordinates
+    char _num; // char on box
     bool _win;
 };
 
 class MyPred
 {
 public:
-    MyPred(char x)
+    MyPred(int x)
             : _x(x)
     {
 
@@ -85,7 +87,7 @@ public:
         return b._num == _x;
     }
 private:
-    char _x;
+    int _x;
 };
 
 TCODColor asd(){
@@ -117,6 +119,25 @@ TCODColor colWall(){
     TCODColor color(255,0,0);
     return color;
 }
+
+bool WinPos(const std::vector<Box>& m);
+int LosePos(const std::vector<Box>& x);
+void func(int x, struct sockaddr *cl_addr, std::string map);
+std::string RandMap(const std::map<int, std::string> &x);
+void *get_approp_addr(struct sockaddr *sock_a);
+void CreateMap(std::string map, char *buf);
+char foo(char x, char *cnum);
+int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
+//int BoxPos(const std::vector<Box>& k, char t);
+void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TCOD_key_t key, std::vector<Box>& boxes, char *pos);
+void CreateBox(std::vector<Box>& b, char *buf, int w, int h, char *pos);
+void PlusPos(char *b, std::vector<int>& p);
+void ReadAndMoving(int s, int x, char *b, char *b1, char *b3, std::vector<Box>& boxes, const std::vector<int>& plus, std::string mapname, char *pos);
+
+void Paint(int z, int z1, char *c, char *c1, int p);
+void GiveMeMap(int x);
+void GiveMeNewMap(TCOD_key_t k, int x);
+bool Situation(char *b, bool sit);
 
 #endif GAME_PROJ_MAIN_H
 

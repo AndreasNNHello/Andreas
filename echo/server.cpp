@@ -10,7 +10,6 @@
 #include <ostream>
 #include <fstream>
 #include <vector>
-#include<stdio.h>
 #include <netdb.h>
 #include <cstring>
 #include <dirent.h>
@@ -20,14 +19,7 @@
 #include <map>
 #include <algorithm>
 
-void func(int x, struct sockaddr *cl_addr, std::string map);
-std::string RandMap(const std::map<int, std::string> &x);
-void *get_approp_addr(struct sockaddr *sock_a);
-void SendMap(std::string map, int sock, char *buf);
-//char foo(const std::vector<Box>& x, char y);
-//int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m);
-//int BoxPos(const std::vector<Box>& k, char t);
-void Moving(char *buf, int x, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key);
+#define SIZE_MAX 1024
 
 int main() {
     int sock, newsock1, newsock2, sz, rndmap;
@@ -36,23 +28,36 @@ int main() {
     struct hostent *rhost;
     char *host;
 
-
-    char buf2[1024] = {0};
-    char address_pres[INET6_ADDRSTRLEN];
+    char buf1[SIZE_MAX] = {0};
+    char buf2[SIZE_MAX] = {0};
+    char buf[SIZE_MAX] = {0};
+    char buf3[SIZE_MAX] = {0};
     std::string nameMap;
     std::map<int, std::string> maps;
     socklen_t cladrrsz = sizeof(cl_addr);
     cp = (struct sockaddr *) &cl_addr;
     sz = sizeof(addr);
-
+    char lose[20];
+    char win[20];
 
     const TCODColor player{0, 255, 0};
     const TCODColor wall{255, 0, 0};
     const TCODColor box{0, 255, 255};
     const TCODColor winCross{255, 255, 255};
     const std::vector<TCODColor> colourVec = {player, wall, box, winCross};
-    std::vector<Coord> CharWin;
+    std::vector<int> Plus;
+    std::vector<Box> newNum;
 
+    int turn = 0, Score;
+    std::vector<int> Num;
+    char chArray[]= {'0','1','2','3','4','5','6','7','8','9',
+                     'a','b','c','d','e','f','g','h','i','j',
+                     'k','l','m','n','o','p','q','r','s','t',
+                     'u','v','w','x','y','z','A','B','C','D',
+                     'E','F','G','H','I','J','K','L','M','N',
+                     'O','P','Q','R','S','T','U','V','W','X',
+                     'Y','Z'};
+    char* pos = chArray;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -99,9 +104,6 @@ int main() {
         std::string tmp2 = "Maps/" + RandMap(maps);
 
 
-    newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
-    newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
-
    /*printf("\nHi,Iam running server.Some Client hit me\n");
 
    newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
@@ -123,42 +125,67 @@ int main() {
            printf("Map message sent\n");
        }
    }*/
-    printf("\nHi,Iam running server.Some Client hit me\n");
-    func(newsock1, (sockaddr *) &cl_addr, tmp2);
-    printf("\nHi,Iam running server.Some Client hit me\n");
-    func(newsock2, (sockaddr *) &cl_addr, tmp2);
 
-    while (1) {
+
+
+    CreateMap(tmp2, buf);
+    int h = std::atoi(&buf[0]);
+    int w = std::atoi(&buf[3]);
+    CreateBox(newNum, buf, w, h, pos);
+    PlusPos(buf, Plus);
+
+    std::string Lose = "Lose";
+    std::string Win = "Win";
+    strcpy(lose, Lose.c_str());
+    strcpy(win, Win.c_str());
+
+    while (!WinPos(newNum) && (newNum.at(LosePos(newNum))._num != '0')) {
+        printf("\nHi,Iam running server.Some Client hit me\n");
+        newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
+        func(newsock1, (sockaddr *) &cl_addr, tmp2);
+        printf("\nHi,Iam running server.Some Client hit me\n");
+        newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
+        func(newsock2, (sockaddr *) &cl_addr, tmp2);
+        //recv(newsock, buf1, SIZE_MAX-1,0);
+        ReadAndMoving(sock, newsock1, buf, buf1, buf3, newNum, Plus, tmp2, pos);
+        ReadAndMoving(sock, newsock2, buf, buf1, buf3, newNum, Plus, tmp2, pos);
+
+        if (newNum.at(LosePos(newNum))._num == '0') {
+            send(sock, lose, sizeof(Lose), 0);
+        }
+        if(WinPos(newNum)) {
+            send(sock, win, sizeof(Win), 0);
+        }
 
     }
     return 0;
 }
 
 void func(int x, struct sockaddr *cl_addr, std::string map){
-    char buf[1024] = {0};
-    char buf1[1024] = {0};
-    std::ifstream in(map);
-    int firstPlrPos, secondPlrPos;
+
+    char address_pres[INET6_ADDRSTRLEN];
 
     //printf("\nHi,Iam running server.Some Client hit me\n");
-
-
     if (x == -1) {
-        perror("no accept Cl1");
+        perror("no accept Cl");
     }
 
     inet_ntop(cl_addr->sa_family,
               get_approp_addr((struct sockaddr *) &cl_addr),
-              address_pres, sizeof address_pres);
-    printf("server: Client1 connection from %s\n", address_pres);
+              address_pres, sizeof(address_pres));
+    printf("server: Client connection from %s\n", address_pres);
+}
 
-    if ((recv(x, (char *) &buf1, SIZE_MAX, 0)) == -1) {
-        perror("Client1 doesn't want starting play");
-    } else {
-        if (buf1[0] == '1') {
+void ReadAndMoving(int s, int x, char *b, char *b1, char *b3, std::vector<Box>& boxes, const std::vector<int>& plus, std::string mapname, char *pos){
+
+    int firstPlrPos, secondPlrPos, k = 0;
+
+    if ((recv(x, (char *) &b1, SIZE_MAX - 1, 0)) == -1) {
+        perror("Client doesn't want starting play");
+    } else if (b1[0] == '1') {
             TCOD_key_t key;
             int timer;
-            switch (buf1[1]) {
+            switch (b1[1]) {
                 case '4':
                     key.vk = TCODK_UP;
                     break;
@@ -172,25 +199,28 @@ void func(int x, struct sockaddr *cl_addr, std::string map){
                     key.vk = TCODK_RIGHT;
                     break;
                 default:
-                    continue;
+                    break;
             }
 
             for (int i = 6; i < x; i++)
-                if (buf[i] == '@') {
+                if (b[i] == '@') {
                     firstPlrPos = i;
-                } else if (buf[i] == '$') {
+                } else if (b[i] == '$') {
                     secondPlrPos = i;
                 }
 
-            Moving(buf, firstPlrPos, colourVec, CharWin, timer, key);
-            send(sock, buf, strlen(buf), 0);
-        } else if (buf1[0] == 's') {
-            SendMap(tmp2, x, buf);
+            Moving(b, firstPlrPos, secondPlrPos, plus, timer, key, boxes, pos);
+            for(auto p : boxes) {
+                b3[k++] = p._num;
+            }
+            send(s, b, sizeof(b),0);
+            send(s, b3, sizeof(b3), 0);
+            //send(sock, buf, strlen(buf), 0);
+        } else if (b1[0] == 's') {
+            send(s, b, sizeof(b),0);
             //SendMap(tmp2, newsock2, buf);
             printf("Map message sent\n");
         }
-    }
-
 }
 
 std::string RandMap(const std::map<int, std::string> &x)
@@ -214,112 +244,156 @@ void *get_approp_addr(struct sockaddr *sock_a)
     return &(((struct sockaddr_in6*)sock_a)->sin6_addr);
 }
 
-void SendMap(std::string map, int sock, char *buf){
+void CreateMap(std::string map, char *buf) {
     std::ifstream in(map);
     std::string str;
+    std::string str1;
     while (!in.eof()) {
         getline(in, str);
         str.append("\n");
-        std::strcpy(buf, str.c_str());
-        send(sock, buf, strlen(buf), 0);
+        str1 += str;
+    }
+    std::strcpy(buf, str1.c_str());
+    // send(sock, buf, strlen(buf), 0);
+}
+
+
+
+void CreateBox(std::vector<Box>& b, char *buf, int w, int h, char *pos) {
+    Box box;
+    int nmb = 7;
+    for (int i = 0; i < sizeof(buf); i++) {
+        if (buf[i] == 'o') {
+            box._box = i;
+            box._num = pos[std::atoi(&buf[w * h + nmb])-1];
+            box._win = false;
+            b.emplace_back(box);
+            nmb +=3;
+            buf[i] = box._num;
+        }
     }
 }
-int rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-std::vector<Box> newNum;
-int k, turn = 0, Score;
-std::vector<int> Num;
-char chArray[]= {'0','1','2','3','4','5','6','7','8','9',
-                 'a','b','c','d','e','f','g','h','i','j',
-                 'k','l','m','n','o','p','q','r','s','t',
-                 'u','v','w','x','y','z','A','B','C','D',
-                 'E','F','G','H','I','J','K','L','M','N',
-                 'O','P','Q','R','S','T','U','V','W','X',
-                 'Y','Z'};
-char* pos = chArray;
 
-void Moving(char *buf, int x, const std::vector<TCODColor>& colVec, const std::vector<Coord>& CharWin, int timer, TCOD_key_t key){
-    std::string strtime = std::to_string(timer/60) + ":" + std::to_string(timer%60);
+void PlusPos(char *b, std::vector<int>& p){
+    for (auto i = 0; i < sizeof(b); i++){
+        if (b[i] == '+'){
+        p.emplace_back(i);
+        }
+    }
+}
+
+
+int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m){
+    for (auto pos = 0; pos < k.size(); pos++) {
+        for (auto p : m) {
+            if (k[pos]._win != true) {
+                if (k[pos]._box == p)
+                    return pos;
+            }
+        }
+    }
+}
+
+void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TCOD_key_t key, std::vector<Box>& boxes, char *pos) {
+    std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
     TCODConsole::root->print(1, 1, strtime.c_str());
     TCODConsole::root->flush();
     int h = std::atoi(&buf[0]);
     int w = std::atoi(&buf[3]);
+    int rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
     /*Box box;
-
-    char tnp = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 1);
-    MyPred pred1(tnp);
-    auto count1 = std::find_if(newNum.begin(), newNum.end(), pred1);
-    char tnp2 = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] - 2);
-    MyPred pred2(tnp2);
-    auto count2 = std::find_if(newNum.begin(), newNum.end(), pred2);
-    char tnp3 = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 1);
-    MyPred pred3(tnp3);
-    auto count3 = std::find_if(newNum.begin(), newNum.end(), pred3);
-    char tnp4 = TCODConsole::root -> getChar(tmpPlrPos[0], tmpPlrPos[1] + 2);
-    MyPred pred4(tnp4);
-    auto count4 = std::find_if(newNum.begin(), newNum.end(), pred4);
-    char tnp5 = TCODConsole::root -> getChar(tmpPlrPos[0] - 1, tmpPlrPos[1]);
-    MyPred pred5(tnp5);
-    auto count5 = std::find_if(newNum.begin(), newNum.end(), pred5);
-    char tnp6 = TCODConsole::root -> getChar(tmpPlrPos[0] - 2, tmpPlrPos[1]);
-    MyPred pred6(tnp6);
-    auto count6 = std::find_if(newNum.begin(), newNum.end(), pred6);
-    char tnp7 = TCODConsole::root -> getChar(tmpPlrPos[0] + 1, tmpPlrPos[1]);
-    MyPred pred7(tnp7);
-    auto count7 = std::find_if(newNum.begin(), newNum.end(), pred7);
-    char tnp8 = TCODConsole::root -> getChar(tmpPlrPos[0] + 2, tmpPlrPos[1]);
-    MyPred pred8(tnp8);
-    auto count8 = std::find_if(newNum.begin(), newNum.end(), pred8);
-
     char chBox = foo(newNum, tnp);
     char chBox3 = foo(newNum, tnp3);
     char chBox5 = foo(newNum, tnp5);
     char chBox7 = foo(newNum, tnp7);
+    */
 
-    if (rndmoves == 1){
-        if (tnp == '#') {
+    int tnp = x - w;
+    MyPred pred1(tnp);
+    auto count1 = std::find_if(boxes.begin(), boxes.end(), pred1);
+    int tnp2 = x + w;
+    MyPred pred2(tnp2);
+    auto count2 = std::find_if(boxes.begin(), boxes.end(), pred2);
+    int tnp3 = x - 1;
+    MyPred pred3(tnp3);
+    auto count3 = std::find_if(boxes.begin(), boxes.end(), pred3);
+    int tnp4 = x + 1;
+    MyPred pred4(tnp4);
+    auto count4 = std::find_if(boxes.begin(), boxes.end(), pred4);
+    int tnp5 = x - w * 2;
+    MyPred pred5(tnp5);
+    auto count5 = std::find_if(boxes.begin(), boxes.end(), pred5);
+    int tnp6 = x + w * 2;
+    MyPred pred6(tnp6);
+    auto count6 = std::find_if(boxes.begin(), boxes.end(), pred6);
+    int tnp7 = x - 2;
+    MyPred pred7(tnp7);
+    auto count7 = std::find_if(boxes.begin(), boxes.end(), pred7);
+    int tnp8 = x + 2;
+    MyPred pred8(tnp8);
+    auto count8 = std::find_if(boxes.begin(), boxes.end(), pred8);
+
+    if (rndmoves == 1) {
+        if (buf[tnp] == '#' || buf[tnp] == y) {
             rndmoves = TCODRandom::getInstance()->getInt(2, 4, 0);
-        } else if (count1 != newNum.end() && tnp2 == '#') {
+        } else if (count1 != boxes.end() && buf[tnp2] == '#') {
             rndmoves = TCODRandom::getInstance()->getInt(2, 4, 0);
-        } else if (count1 != newNum.end() && count2 != newNum.end()){
+        } else if (count1 != boxes.end() && count2 != boxes.end()) {
             rndmoves = TCODRandom::getInstance()->getInt(2, 4, 0);
         }
     }
 
-    if (rndmoves == 2){
-        if (tnp3 == '#') {
+    if (rndmoves == 2) {
+        if (buf[tnp3] == '#' || buf[tnp3] == y) {
             rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        } else if (count3 != newNum.end() && tnp4 == '#') {
+        } else if (count3 != boxes.end() && buf[tnp4] == '#') {
             rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        } else if (count3 != newNum.end() && count4 != newNum.end()){
-            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        }
-    }
-
-    if (rndmoves == 3){
-        if (tnp5 == '#') {
-            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        } else if (count5 != newNum.end() && tnp6 == '#') {
-            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        } else if (count5 != newNum.end() && count6 != newNum.end()){
+        } else if (count3 != boxes.end() && count4 != boxes.end()) {
             rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
         }
     }
 
-    if (rndmoves == 4){
-        if (tnp7 == '#') {
+    if (rndmoves == 3) {
+        if (buf[tnp5] == '#' || buf[tnp5] == y) {
+            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+        } else if (count5 != boxes.end() && buf[tnp6] == '#') {
+            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+        } else if (count5 != boxes.end() && count6 != boxes.end()) {
+            rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+        }
+    }
+
+    if (rndmoves == 4) {
+        if (buf[tnp7] == '#' || buf[tnp7] == y) {
             rndmoves = TCODRandom::getInstance()->getInt(1, 3, 0);
-        } else if (count7 != newNum.end() && tnp8 == '#') {
+        } else if (count7 != boxes.end() && buf[tnp8] == '#') {
             rndmoves = TCODRandom::getInstance()->getInt(1, 3, 0);
-        } else if (count7 != newNum.end() && count8 != newNum.end()){
+        } else if (count7 != boxes.end() && count8 != boxes.end()) {
             rndmoves = TCODRandom::getInstance()->getInt(1, 3, 0);
         }
-    }*/
-    char  tmp;
-    if ( key.vk == TCODK_UP  || rndmoves == 1 ) {
-       buf[x] = tmp;
-       buf[x] = buf[x-w];
-       buf[x-w] = tmp;
-       x -= w;
+    }
+
+    char tmp;
+    if (key.vk == TCODK_UP || rndmoves == 1) {
+        if (buf[tnp] != '#' && buf[tnp] != buf[y]) {
+            if (buf[tnp] == 'o') {
+                if (buf[tnp5] != '#' && buf[tnp5] != 'o' && buf[tnp5] != buf[y]) {
+                    buf[tnp5] = buf[tnp];
+                    tmp = buf[x];
+                    buf[x] = buf[tnp];
+                    buf[tnp] = tmp;
+                    x -= w;
+                    tnp -= w;
+                    boxes[BoxPos1(boxes, plus)]._win = true;
+                }
+            } else {
+                tmp = buf[x];
+                buf[x] = buf[tnp];
+                buf[tnp] = tmp;
+                x -= w;
+            }
+        }
+    }
         /*if (tnp != '#') {
             if (count1 != newNum.end()) {
                 if (tnp2 == '#' || (count2 != newNum.end())) {}
@@ -353,166 +427,95 @@ void Moving(char *buf, int x, const std::vector<TCODColor>& colVec, const std::v
 
             }
         }*/
-    }
 
-    else if ( key.vk == TCODK_DOWN  || rndmoves == 2 ) {
-        buf[x] = tmp;
-        buf[x] = buf[x+w];
-        buf[x+w] = tmp;
-        x += w;
-        /*if (tnp3 != '#'){
-            if (count3 != newNum.end()){
-                if (tnp4 == '#' || (count4 != newNum.end())){}
-                else {
-                    TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '@');
 
-                    TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                    TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 2, chBox3);
-
-                    tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
-                    ++newNum[BoxPos(newNum, chBox3)]._box._j;
-                    for (auto m : CharWin){
-                        if (  tmpPlrPos[0] == m._i &&  (tmpPlrPos[1] + 1) == m._j ) {
-                            int p = BoxPos1(newNum, CharWin);
-                            newNum[p]._win = true;
-                        }
-                    }
-                    for (auto m : CharWin){
-                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
-                            int p = BoxPos(newNum, chBox3);
-                            newNum[p]._win = false;
-                            TCODConsole::root->setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, newNum[p]._num);
-
-                        }
-                    }
+    else if (key.vk == TCODK_DOWN || rndmoves == 2) {
+        if (buf[tnp2] != '#' && buf[tnp2] != buf[y]) {
+            if (buf[tnp2] == 'o') {
+                if (buf[tnp6] != '#' && buf[tnp6] != 'o' && buf[tnp6] != buf[y]) {
+                    buf[tnp6] = buf[tnp2];
+                    tmp = buf[x];
+                    buf[x] = buf[tnp2];
+                    buf[tnp2] = tmp;
+                    x += w;
+                    tnp2 += w;
+                    boxes[BoxPos1(boxes, plus)]._win = true;
                 }
-            }
-            else {
-                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] + 1, '@');
-
-                TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                tmpPlrPos = {tmpPlrPos[0], tmpPlrPos[1] + 1};
+            } else {
+                tmp = buf[x];
+                buf[x] = buf[tnp2];
+                buf[tnp2] = tmp;
+                x += w;
             }
         }
-        for (auto k : CharWin) {
-            if(tmpPlrPos[0] == k._i && (tmpPlrPos[1] - 1) == k._j){
-                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1] - 1, '+');
-
-            }
-        }*/
-    }
-
-    else if ( key.vk == TCODK_LEFT || rndmoves == 3 ) {
-        buf[x] = tmp;
-        buf[x] = buf[x-1];
-        buf[x-1] = tmp;
-        x -= 1;
-        /*if (tnp5 != '#'){
-            if (count5 != newNum.end()){
-                if (tnp6 == '#' || (count6 != newNum.end())){}
-                else {
-                    TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '@');
-
-                    TCODConsole::root-> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                    TCODConsole::root -> setChar(tmpPlrPos[0] - 2, tmpPlrPos[1], chBox5);
-
-                    tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
-                    --newNum[BoxPos(newNum, chBox5)]._box._i;
-                    for (auto m : CharWin){
-                        if (  (tmpPlrPos[0] - 1) == m._i &&  tmpPlrPos[1] == m._j ) {
-                            int p = BoxPos1(newNum, CharWin);
-                            newNum[p]._win = true;
-                        }
-                    }
-                    for (auto m : CharWin){
-                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
-                            int p = BoxPos(newNum, chBox5);
-                            newNum[p]._win = false;
-                            TCODConsole::root->setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], newNum[p]._num);
-
-                        }
-                    }
+    } else if (key.vk == TCODK_LEFT || rndmoves == 3) {
+        if (buf[tnp3] != '#' && buf[tnp3] != buf[y]) {
+            if (buf[tnp3] == 'o') {
+                if (buf[tnp7] != '#' && buf[tnp7] != 'o' && buf[tnp7] != buf[y]) {
+                    buf[tnp7] = buf[tnp3];
+                    tmp = buf[x];
+                    buf[x] = buf[tnp3];
+                    buf[tnp3] = tmp;
+                    x -= 1;
+                    tnp3 -= 1;
+                    boxes[BoxPos1(boxes, plus)]._win = true;
                 }
-            }
-            else {
-                TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '@');
-
-                TCODConsole::root -> setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                tmpPlrPos = {tmpPlrPos[0] - 1, tmpPlrPos[1]};
+            } else {
+                tmp = buf[x];
+                buf[x] = buf[tnp3];
+                buf[tnp3] = tmp;
+                x -= 1;
             }
         }
-        for (auto k : CharWin) {
-            if((tmpPlrPos[0] + 1) == k._i && tmpPlrPos[1] == k._j){
-                TCODConsole::root -> setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '+');
-
-            }
-        }*/
-    }
-
-    else if ( key.vk == TCODK_RIGHT  || rndmoves == 4) {
-        buf[x] = tmp;
-        buf[x] = buf[x+1];
-        buf[x+1] = tmp;
-        x += 1;
-       /* if (tnp7 != '#') {
-            if (count7 != newNum.end()){
-                if (tnp8 == '#' || (count8 != newNum.end())){}
-                else {
-                    TCODConsole::root->setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '@');
-
-                    TCODConsole::root->setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                    TCODConsole::root->setChar(tmpPlrPos[0] + 2, tmpPlrPos[1], chBox7);
-
-                    tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
-                    ++newNum[BoxPos(newNum, chBox7)]._box._i;
-                    for (auto m : CharWin){
-                        if ((tmpPlrPos[0] + 1) == m._i && tmpPlrPos[1] == m._j ) {
-                            int p = BoxPos1(newNum, CharWin);
-                            newNum[p]._win = true;
-                        }
-                    }
-                    for (auto m : CharWin){
-                        if (tmpPlrPos[0] == m._i &&  (tmpPlrPos[1]) == m._j ) {
-                            int p = BoxPos(newNum, chBox7);
-                            newNum[p]._win = false;
-                            TCODConsole::root->setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], newNum[p]._num);
-                        }
-                    }
+    } else if (key.vk == TCODK_RIGHT || rndmoves == 4) {
+        if (buf[tnp4] != '#' && buf[tnp4] != buf[y]) {
+            if (buf[tnp4] == 'o') {
+                if (buf[tnp8] != '#' && buf[tnp8] != 'o' && buf[tnp8] != buf[y]) {
+                    buf[tnp8] = buf[tnp4];
+                    tmp = buf[x];
+                    buf[x] = buf[tnp4];
+                    buf[tnp4] = tmp;
+                    x += 1;
+                    tnp4 += 1;
+                    boxes[BoxPos1(boxes, plus)]._win = true;
                 }
-            }
-            else {
-                TCODConsole::root->setChar(tmpPlrPos[0] + 1, tmpPlrPos[1], '@');
-
-                TCODConsole::root->setChar(tmpPlrPos[0], tmpPlrPos[1], ' ');
-
-                tmpPlrPos = {tmpPlrPos[0] + 1, tmpPlrPos[1]};
+            } else {
+                tmp = buf[x];
+                buf[x] = buf[tnp4];
+                buf[tnp4] = tmp;
+                x += 1;
             }
         }
-        for (auto k : CharWin) {
-            if((tmpPlrPos[0] - 1) == k._i && tmpPlrPos[1] == k._j){
-                TCODConsole::root -> setChar(tmpPlrPos[0] - 1, tmpPlrPos[1], '+');
+    }
+    //turn++;
+    //Score = 700-turn*10;
 
-            }
-        }
-    }*/
-    int k=0;
-    turn++;
-    Score = 700-turn*10;
-
-    /*for(auto num = newNum.begin() ; num != newNum.end(); num++){
+    for(auto num = boxes.begin() ; num != boxes.end(); num++){
         if (num->_win == false){
-            num->_num = pos[--Num[k++]-1];
+            num->_num = pos[--num->_num-1];
         }
-        TCODConsole::root->setChar(num->_box._i, num->_box._j, num->_num);
     }
-    TCODConsole::root->flush();
-}*/
 }
+
+int LosePos(const std::vector<Box>& x) {
+    for (auto i = 0; i < x.size(); i++) {
+        if (x.at(i)._num == '0')
+            return i;
+    }
+}
+
+bool WinPos(const std::vector<Box>& m){
+    int sw = 0;
+    for (auto &s : m){
+        if (s._win == true) {
+            sw++;
+        }
+    }
+    if (sw == m.size()){
+        return true;
+    } else {
+        return  false;
+    }
 }
 
 /*char foo(const std::vector<Box>& x, char y){
@@ -529,14 +532,4 @@ int BoxPos(const std::vector<Box>& k, char t) {
             return i;
     }
 }
-
-int BoxPos1(const std::vector<Box>& k, const std::vector<Coord>& m) {
-    for (auto pos = 0; pos < newNum.size(); pos++) {
-        for (auto p : m){
-            if(k[pos]._win != true){
-                if ( k[pos]._box._i == p._i && k[pos]._box._j == p._j)
-                    return pos;
-            }
-        }
-    }
-}*/
+*/

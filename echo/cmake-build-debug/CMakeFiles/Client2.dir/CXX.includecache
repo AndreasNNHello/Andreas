@@ -49,6 +49,14 @@ libtcod.hpp
 -
 ostream
 -
+stdio.h
+-
+stdlib.h
+-
+cstring
+-
+map
+-
 
 /home/andreas/Desktop/libtcod-1.5.1/include/bresenham.h
 

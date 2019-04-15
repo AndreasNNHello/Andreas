@@ -17,6 +17,14 @@ libtcod.hpp
 -
 ostream
 -
+stdio.h
+-
+stdlib.h
+-
+cstring
+-
+map
+-
 
 /home/andreas/CLionProjects/echo/server.cpp
 sys/types.h
@@ -42,8 +50,6 @@ ostream
 fstream
 -
 vector
--
-stdio.h
 -
 netdb.h
 -
