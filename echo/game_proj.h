@@ -11,6 +11,7 @@
 #include <cstring>
 #include <map>
 
+#define SIZE_MAX 1024
 
 template <typename T> class TwoArray {
 public:
@@ -31,7 +32,6 @@ public:
     };
 
 
-    friend std::ostream& operator<<(std::ostream& stream, std::vector<T>& Array);
     friend std::ifstream& operator>>(std::ifstream &file, std::vector<T> &Array);
 
     void setObjPos(const unsigned posX, const unsigned posY, T obj) {
@@ -77,7 +77,7 @@ struct Box{
 class MyPred
 {
 public:
-    MyPred(int x)
+    MyPred(char x)
             : _x(x)
     {
 
@@ -87,7 +87,7 @@ public:
         return b._num == _x;
     }
 private:
-    int _x;
+    char _x;
 };
 
 TCODColor asd(){
@@ -122,19 +122,19 @@ TCODColor colWall(){
 
 bool WinPos(const std::vector<Box>& m);
 int LosePos(const std::vector<Box>& x);
-void func(int x, struct sockaddr *cl_addr, std::string map);
+void func(int x, struct sockaddr *cl_addr, int s);
 std::string RandMap(const std::map<int, std::string> &x);
 void *get_approp_addr(struct sockaddr *sock_a);
 void CreateMap(std::string map, char *buf);
 char foo(char x, char *cnum);
 int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
 //int BoxPos(const std::vector<Box>& k, char t);
-void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TCOD_key_t key, std::vector<Box>& boxes, char *pos);
-void CreateBox(std::vector<Box>& b, char *buf, int w, int h, char *pos);
-void PlusPos(char *b, std::vector<int>& p);
-void ReadAndMoving(int s, int x, char *b, char *b1, char *b3, std::vector<Box>& boxes, const std::vector<int>& plus, std::string mapname, char *pos);
+void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, char *pos, int rndmoves);
+void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, char *pos, std::vector<int>& plus, int count);
+//void PlusPos(char *b, std::vector<int>& p);
+void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, char *pos, TCOD_key_t key, int rndmoves);
 
-void Paint(int z, int z1, char *c, char *c1, int p);
+void Paint(int p);
 void GiveMeMap(int x);
 void GiveMeNewMap(TCOD_key_t k, int x);
 bool Situation(char *b, bool sit);

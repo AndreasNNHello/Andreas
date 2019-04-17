@@ -19,22 +19,20 @@
 #include <map>
 #include <algorithm>
 
-#define SIZE_MAX 1024
-
 int main() {
-    int sock, newsock1, newsock2, sz, rndmap;
+    int sock, newsock1, newsock2, sz;
     struct sockaddr_in addr, cl_addr;
     struct sockaddr *cp;
     struct hostent *rhost;
     char *host;
 
-    char buf1[SIZE_MAX] = {0};
+
     char buf2[SIZE_MAX] = {0};
+    char buf1[SIZE_MAX] = {0};
     char buf[SIZE_MAX] = {0};
-    char buf3[SIZE_MAX] = {0};
     std::string nameMap;
     std::map<int, std::string> maps;
-    socklen_t cladrrsz = sizeof(cl_addr);
+
     cp = (struct sockaddr *) &cl_addr;
     sz = sizeof(addr);
     char lose[20];
@@ -47,9 +45,13 @@ int main() {
     const std::vector<TCODColor> colourVec = {player, wall, box, winCross};
     std::vector<int> Plus;
     std::vector<Box> newNum;
+    int count;
+    int sttime;
+
+    socklen_t cladrrsz = sizeof(cl_addr);
+    char address_pres[INET6_ADDRSTRLEN];
 
     int turn = 0, Score;
-    std::vector<int> Num;
     char chArray[]= {'0','1','2','3','4','5','6','7','8','9',
                      'a','b','c','d','e','f','g','h','i','j',
                      'k','l','m','n','o','p','q','r','s','t',
@@ -68,7 +70,7 @@ int main() {
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(51002);
+    addr.sin_port = htons(50002);
 
     if (bind(sock, (struct sockaddr *) &addr, sz) == -1) {
         perror("no binding");
@@ -103,89 +105,69 @@ int main() {
         maps.erase(0);
         std::string tmp2 = "Maps/" + RandMap(maps);
 
-
-   /*printf("\nHi,Iam running server.Some Client hit me\n");
-
-   newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
-
-   if (newsock2 == -1) {
-       perror("no accept Cl2");
-   }
-
-   inet_ntop(cl_addr.sin_family,
-             get_approp_addr((struct sockaddr *) &cl_addr),
-             address_pres, sizeof address_pres);
-   printf("server: Client2 connection from %s\n", address_pres);
-
-   if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
-       perror("Client2 doesn't want starting play");
-   } else {
-       if (buf2[0] == 's') {
-           SendMap(tmp2, newsock2, buf);
-           printf("Map message sent\n");
-       }
-   }*/
+        CreateMap(tmp2, buf);
+    newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
 
 
-
-    CreateMap(tmp2, buf);
     int h = std::atoi(&buf[0]);
     int w = std::atoi(&buf[3]);
-    CreateBox(newNum, buf, w, h, pos);
-    PlusPos(buf, Plus);
+    //count = std::atoi(&buf[(w+1)*(h+1)+1]);
+    CreateBoxAndPlus(newNum, buf, w, h, pos, Plus, count);
 
     std::string Lose = "Lose";
     std::string Win = "Win";
     strcpy(lose, Lose.c_str());
     strcpy(win, Win.c_str());
 
+    printf("\nHi,Iam running server.Some Client hit me\n");
+    if (newsock1 == -1) {
+        perror("no accept Cl1");
+    }
+
+    inet_ntop(cl_addr.sin_family,
+              get_approp_addr((struct sockaddr *) &cl_addr),
+              address_pres, sizeof address_pres);
+    printf("server: Client connection from %s\n", address_pres);
+
     while (!WinPos(newNum) && (newNum.at(LosePos(newNum))._num != '0')) {
+
+        /*func(newsock1, (sockaddr *) &cl_addr, sock);
+        send(sock, buf, strlen(buf), 0);
         printf("\nHi,Iam running server.Some Client hit me\n");
-        newsock1 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
-        func(newsock1, (sockaddr *) &cl_addr, tmp2);
-        printf("\nHi,Iam running server.Some Client hit me\n");
-        newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
-        func(newsock2, (sockaddr *) &cl_addr, tmp2);
-        //recv(newsock, buf1, SIZE_MAX-1,0);
-        ReadAndMoving(sock, newsock1, buf, buf1, buf3, newNum, Plus, tmp2, pos);
-        ReadAndMoving(sock, newsock2, buf, buf1, buf3, newNum, Plus, tmp2, pos);
+        //newsock2 = accept(sock, (struct sockaddr *) &cl_addr, &cladrrsz);
+        func(newsock2, (sockaddr *) &cl_addr, sock);
+        send(sock, buf, strlen(buf), 0);
+        *///recv(newsock, buf1, SIZE_MAX-1,0);
+
+        int timer1 = 150;
+        //int timer1 = count;
+        if ((recv(newsock1, (char *) &buf2, SIZE_MAX, 0)) == -1) {
+            perror("Client doesn't want starting play");
+        }
+        TCOD_key_t key;
+        sttime = TCODSystem::getElapsedSeconds();
+        int rndmoves = 0;
+        int interval = 0;
+
 
         if (newNum.at(LosePos(newNum))._num == '0') {
             send(sock, lose, sizeof(Lose), 0);
         }
-        if(WinPos(newNum)) {
+        if (WinPos(newNum)) {
             send(sock, win, sizeof(Win), 0);
         }
 
-    }
-    return 0;
-}
-
-void func(int x, struct sockaddr *cl_addr, std::string map){
-
-    char address_pres[INET6_ADDRSTRLEN];
-
-    //printf("\nHi,Iam running server.Some Client hit me\n");
-    if (x == -1) {
-        perror("no accept Cl");
-    }
-
-    inet_ntop(cl_addr->sa_family,
-              get_approp_addr((struct sockaddr *) &cl_addr),
-              address_pres, sizeof(address_pres));
-    printf("server: Client connection from %s\n", address_pres);
-}
-
-void ReadAndMoving(int s, int x, char *b, char *b1, char *b3, std::vector<Box>& boxes, const std::vector<int>& plus, std::string mapname, char *pos){
-
-    int firstPlrPos, secondPlrPos, k = 0;
-
-    if ((recv(x, (char *) &b1, SIZE_MAX - 1, 0)) == -1) {
-        perror("Client doesn't want starting play");
-    } else if (b1[0] == '1') {
-            TCOD_key_t key;
-            int timer;
-            switch (b1[1]) {
+        int timer = count;
+        if (buf2[0] == 's'){
+                //timer = interval + count - sttime;
+                timer = 160;
+                std::string nstr = std::to_string(timer);
+                std::strcpy(&buf[(w+1)*(h+1)+1], nstr.c_str());
+                send(newsock1, buf, strlen(buf), 0);
+                //send(newsock2, buf, strlen(buf), 0);
+                printf("Map message sent\n");
+        } else if (buf2[0] == '1') {
+            switch (buf2[1]) {
                 case '4':
                     key.vk = TCODK_UP;
                     break;
@@ -202,25 +184,54 @@ void ReadAndMoving(int s, int x, char *b, char *b1, char *b3, std::vector<Box>& 
                     break;
             }
 
-            for (int i = 6; i < x; i++)
+            ReadAndMoving(buf, newNum, Plus, pos, key, rndmoves);
+                timer = interval + count - sttime;
+                interval = sttime;
+            std::string nstr = std::to_string(timer);
+            std::strcpy(&buf[(w + 1) * (h + 1) + 1], nstr.c_str());
+            send(newsock1, buf, strlen(buf), 0);
+        } else if (buf2[0] == 'r'){
+                    rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+                    ReadAndMoving(buf, newNum, Plus, pos, key, rndmoves);
+                    interval = sttime;
+            std::string nstr = std::to_string(timer);
+            std::strcpy(&buf[(w + 1) * (h + 1) + 1], nstr.c_str());
+            send(newsock1, buf, strlen(buf), 0);
+        }
+
+           
+            //count = timer;
+    }
+    return 0;
+}
+
+/*void func(int x, struct sockaddr *cl_addr, int s){
+    socklen_t cladrrsz = sizeof(cl_addr);
+    char address_pres[INET6_ADDRSTRLEN];
+    printf("\nHi,Iam running server.Some Client hit me\n");
+    x = accept(s, (struct sockaddr *) &cl_addr, &cladrrsz);
+    //printf("\nHi,Iam running server.Some Client hit me\n");
+    if (x == -1) {
+        perror("no accept Cl");
+    }
+
+    inet_ntop(cl_addr->sa_family,
+              get_approp_addr((struct sockaddr *) &cl_addr),
+              address_pres, sizeof(address_pres));
+    printf("server: Client connection from %s\n", address_pres);
+}*/
+
+void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, char *pos, TCOD_key_t key, int rndmoves){
+    int firstPlrPos, secondPlrPos;
+
+            for (int i = 6; i < strlen(b); i++)
                 if (b[i] == '@') {
                     firstPlrPos = i;
                 } else if (b[i] == '$') {
                     secondPlrPos = i;
                 }
 
-            Moving(b, firstPlrPos, secondPlrPos, plus, timer, key, boxes, pos);
-            for(auto p : boxes) {
-                b3[k++] = p._num;
-            }
-            send(s, b, sizeof(b),0);
-            send(s, b3, sizeof(b3), 0);
-            //send(sock, buf, strlen(buf), 0);
-        } else if (b1[0] == 's') {
-            send(s, b, sizeof(b),0);
-            //SendMap(tmp2, newsock2, buf);
-            printf("Map message sent\n");
-        }
+        Moving(b, firstPlrPos, secondPlrPos, plus, key, boxes, pos, rndmoves);
 }
 
 std::string RandMap(const std::map<int, std::string> &x)
@@ -254,34 +265,32 @@ void CreateMap(std::string map, char *buf) {
         str1 += str;
     }
     std::strcpy(buf, str1.c_str());
-    // send(sock, buf, strlen(buf), 0);
+    //send(sock, buf, strlen(buf), 0);
 }
 
 
 
-void CreateBox(std::vector<Box>& b, char *buf, int w, int h, char *pos) {
+void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, char *pos, std::vector<int>& plus, int count) {
     Box box;
-    int nmb = 7;
-    for (int i = 0; i < sizeof(buf); i++) {
+    int nmb = 6;
+    for (int i = 0; i < strlen(buf); i++) {
         if (buf[i] == 'o') {
             box._box = i;
-            box._num = pos[std::atoi(&buf[w * h + nmb])-1];
+            int t = (w+1)*h;
+            int p = std::atoi(&buf[t + nmb]);
+            box._num = pos[p-1];
             box._win = false;
             b.emplace_back(box);
             nmb +=3;
             buf[i] = box._num;
         }
-    }
-}
-
-void PlusPos(char *b, std::vector<int>& p){
-    for (auto i = 0; i < sizeof(b); i++){
-        if (b[i] == '+'){
-        p.emplace_back(i);
+        else if (buf[i] == '+') {
+            plus.emplace_back(i);
         }
     }
+    std::string count1 = &buf[(w+1)*(h)+nmb];
+    count = std::atoi(&buf[(w+1)*(h)+nmb]);
 }
-
 
 int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m){
     for (auto pos = 0; pos < k.size(); pos++) {
@@ -294,13 +303,13 @@ int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m){
     }
 }
 
-void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TCOD_key_t key, std::vector<Box>& boxes, char *pos) {
-    std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
+void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, char *pos, int rndmoves) {
+    /*std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
     TCODConsole::root->print(1, 1, strtime.c_str());
-    TCODConsole::root->flush();
+    TCODConsole::root->flush();*/
     int h = std::atoi(&buf[0]);
     int w = std::atoi(&buf[3]);
-    int rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+
     /*Box box;
     char chBox = foo(newNum, tnp);
     char chBox3 = foo(newNum, tnp3);
@@ -308,30 +317,32 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TC
     char chBox7 = foo(newNum, tnp7);
     */
 
-    int tnp = x - w;
-    MyPred pred1(tnp);
+    int tnp = x - w - 1;
+    MyPred pred1(buf[tnp]);
     auto count1 = std::find_if(boxes.begin(), boxes.end(), pred1);
-    int tnp2 = x + w;
-    MyPred pred2(tnp2);
+    int tnp2 = x + w + 1;
+    MyPred pred2(buf[tnp2]);
     auto count2 = std::find_if(boxes.begin(), boxes.end(), pred2);
     int tnp3 = x - 1;
-    MyPred pred3(tnp3);
+    MyPred pred3(buf[tnp3]);
     auto count3 = std::find_if(boxes.begin(), boxes.end(), pred3);
     int tnp4 = x + 1;
-    MyPred pred4(tnp4);
+    MyPred pred4(buf[tnp4]);
     auto count4 = std::find_if(boxes.begin(), boxes.end(), pred4);
-    int tnp5 = x - w * 2;
-    MyPred pred5(tnp5);
+    int tnp5 = x - w * 2 - 2;
+    MyPred pred5(buf[tnp5]);
     auto count5 = std::find_if(boxes.begin(), boxes.end(), pred5);
-    int tnp6 = x + w * 2;
-    MyPred pred6(tnp6);
+    int tnp6 = x + w * 2 + 2;
+    MyPred pred6(buf[tnp6]);
     auto count6 = std::find_if(boxes.begin(), boxes.end(), pred6);
     int tnp7 = x - 2;
-    MyPred pred7(tnp7);
+    MyPred pred7(buf[tnp7]);
     auto count7 = std::find_if(boxes.begin(), boxes.end(), pred7);
     int tnp8 = x + 2;
-    MyPred pred8(tnp8);
+    MyPred pred8(buf[tnp8]);
     auto count8 = std::find_if(boxes.begin(), boxes.end(), pred8);
+
+
 
     if (rndmoves == 1) {
         if (buf[tnp] == '#' || buf[tnp] == y) {
@@ -375,22 +386,30 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TC
 
     char tmp;
     if (key.vk == TCODK_UP || rndmoves == 1) {
-        if (buf[tnp] != '#' && buf[tnp] != buf[y]) {
-            if (buf[tnp] == 'o') {
-                if (buf[tnp5] != '#' && buf[tnp5] != 'o' && buf[tnp5] != buf[y]) {
+        if (buf[tnp] != '#' && buf[tnp] != buf[y]){
+            if (count1 != boxes.end()) {
+                if (buf[tnp5] != '#' && (count5 != boxes.end()) && buf[tnp5] != buf[y]) {
                     buf[tnp5] = buf[tnp];
                     tmp = buf[x];
                     buf[x] = buf[tnp];
                     buf[tnp] = tmp;
-                    x -= w;
-                    tnp -= w;
-                    boxes[BoxPos1(boxes, plus)]._win = true;
+                    x -= (w+1);
+                    for (auto a : plus) {
+                        if(a == tnp){
+                            boxes[BoxPos1(boxes, plus)]._win = true;
+                        }
                 }
-            } else {
-                tmp = buf[x];
-                buf[x] = buf[tnp];
-                buf[tnp] = tmp;
-                x -= w;
+                }
+            }
+            else  {
+                buf[tnp] = buf[x];
+                buf[x] = ' ';
+                x -= (w+1);
+                for (auto a : plus) {
+                    if ((x+w+1) == a) {
+                        buf[x+w+1] = '+';
+                    }
+                }
             }
         }
     }
@@ -430,70 +449,105 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, int timer, TC
 
 
     else if (key.vk == TCODK_DOWN || rndmoves == 2) {
-        if (buf[tnp2] != '#' && buf[tnp2] != buf[y]) {
-            if (buf[tnp2] == 'o') {
-                if (buf[tnp6] != '#' && buf[tnp6] != 'o' && buf[tnp6] != buf[y]) {
+        if (buf[tnp2] != '#' && buf[tnp2] != buf[y]){
+            if (count2 != boxes.end()) {
+                if (buf[tnp6] != '#' && (count6 != boxes.end()) && buf[tnp6] != buf[y]) {
                     buf[tnp6] = buf[tnp2];
                     tmp = buf[x];
                     buf[x] = buf[tnp2];
                     buf[tnp2] = tmp;
-                    x += w;
-                    tnp2 += w;
-                    boxes[BoxPos1(boxes, plus)]._win = true;
+                    x += (w+1);
+                    for (auto a : plus) {
+                        if(a == tnp2){
+                            boxes[BoxPos1(boxes, plus)]._win = true;
+                        }
+                    }
                 }
-            } else {
-                tmp = buf[x];
-                buf[x] = buf[tnp2];
-                buf[tnp2] = tmp;
-                x += w;
+            }
+            else  {
+                buf[tnp2] = buf[x];
+                buf[x] = ' ';
+                x += (w+1);
+                for (auto a : plus) {
+                    if ((x-w-1) == a) {
+                        buf[x-w-1] = '+';
+                    }
+                }
             }
         }
-    } else if (key.vk == TCODK_LEFT || rndmoves == 3) {
-        if (buf[tnp3] != '#' && buf[tnp3] != buf[y]) {
-            if (buf[tnp3] == 'o') {
-                if (buf[tnp7] != '#' && buf[tnp7] != 'o' && buf[tnp7] != buf[y]) {
+    }
+
+    else if (key.vk == TCODK_LEFT || rndmoves == 3) {
+        if (buf[tnp3] != '#' && buf[tnp3] != buf[y]){
+            if (count3 != boxes.end()) {
+                if (buf[tnp7] != '#' && (count7 != boxes.end()) && buf[tnp7] != buf[y]) {
                     buf[tnp7] = buf[tnp3];
                     tmp = buf[x];
                     buf[x] = buf[tnp3];
                     buf[tnp3] = tmp;
                     x -= 1;
-                    tnp3 -= 1;
-                    boxes[BoxPos1(boxes, plus)]._win = true;
+                    for (auto a : plus) {
+                        if(a == tnp3){
+                            boxes[BoxPos1(boxes, plus)]._win = true;
+                        }
+                    }
                 }
-            } else {
-                tmp = buf[x];
-                buf[x] = buf[tnp3];
-                buf[tnp3] = tmp;
+            }
+            else  {
+                buf[tnp3] = buf[x];
+                buf[x] = ' ';
                 x -= 1;
+                for (auto a : plus) {
+                    if ((x+1) == a) {
+                        buf[x+1] = '+';
+                    }
+                }
             }
         }
-    } else if (key.vk == TCODK_RIGHT || rndmoves == 4) {
-        if (buf[tnp4] != '#' && buf[tnp4] != buf[y]) {
-            if (buf[tnp4] == 'o') {
-                if (buf[tnp8] != '#' && buf[tnp8] != 'o' && buf[tnp8] != buf[y]) {
+    }
+
+    else if (key.vk == TCODK_RIGHT || rndmoves == 4) {
+        if (buf[tnp4] != '#' && buf[tnp4] != buf[y]){
+            if (count4 != boxes.end()) {
+                if (buf[tnp8] != '#' && (count8 != boxes.end()) && buf[tnp8] != buf[y]) {
                     buf[tnp8] = buf[tnp4];
                     tmp = buf[x];
                     buf[x] = buf[tnp4];
                     buf[tnp4] = tmp;
                     x += 1;
-                    tnp4 += 1;
-                    boxes[BoxPos1(boxes, plus)]._win = true;
+                    for (auto a : plus) {
+                        if(a == tnp){
+                            boxes[BoxPos1(boxes, plus)]._win = true;
+                        }
+                    }
                 }
-            } else {
-                tmp = buf[x];
-                buf[x] = buf[tnp4];
-                buf[tnp4] = tmp;
+            }
+            else  {
+                buf[tnp4] = buf[x];
+                buf[x] = ' ';
                 x += 1;
+                for (auto a : plus) {
+                    if ((x-1) == a) {
+                        buf[x-1] = '+';
+                    }
+                }
             }
         }
     }
     //turn++;
     //Score = 700-turn*10;
-
+    for (int i = 6; i < (w*h+6); i++){
+    int tnp9 = buf[i];
+    MyPred pred9(buf[tnp9]);
+    auto count9 = std::find_if(boxes.begin(), boxes.end(), pred9);
     for(auto num = boxes.begin() ; num != boxes.end(); num++){
         if (num->_win == false){
             num->_num = pos[--num->_num-1];
+            if (count9 != boxes.end()){
+                buf[i] = pos[--buf[i]-1];
+            }
         }
+    }
     }
 }
 
