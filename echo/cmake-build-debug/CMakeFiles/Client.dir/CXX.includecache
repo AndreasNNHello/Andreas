@@ -57,6 +57,8 @@ cstring
 -
 map
 -
+time.h
+-
 
 /home/andreas/Desktop/libtcod-1.5.1/include/bresenham.h
 

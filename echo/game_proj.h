@@ -1,5 +1,5 @@
-#ifndef GAME_PROJ_MAIN_H
-#define GAME_PROJ_MAIN_H
+#ifndef GAME_PROJ_H
+#define GAME_PROJ_H
 
 #include <iostream>
 #include <vector>
@@ -10,8 +10,10 @@
 #include <stdlib.h>
 #include <cstring>
 #include <map>
+#include <time.h>
 
 #define SIZE_MAX 1024
+#define CLOCKS_PER_SEC 25000
 
 template <typename T> class TwoArray {
 public:
@@ -31,64 +33,33 @@ public:
 //      delete [] _arr;
     };
 
-
-    friend std::ifstream& operator>>(std::ifstream &file, std::vector<T> &Array);
-
-    void setObjPos(const unsigned posX, const unsigned posY, T obj) {
-        _arr[posX][posY] = obj;
-    }
-
-    /*void setboxPos(const unsigned posX, const unsigned posY, T obj) {
-        Box(_arr[posX][posY], n) = obj;
-    }*/
-
-    char getObjPos (const unsigned posX, const unsigned posY) const{
-        return _arr[posX][posY];
-    }
-
-
-    unsigned  getDimX() const {
-        return _width;
-    }
-
-    unsigned  getDimY() const {
-        return _height;
-    }
-
 private:
-    //std::vector<size_t> player;
-    //std::vector<size_t> box;
 
     T **_arr;
     int _width, _height;
 };
 
-/*struct Coord{
-    int _i;
-    int _j;
-};*/
-
 struct Box{
     int _box; // coordinates
-    char _num; // char on box
+    int _num; // char on box
     bool _win;
 };
 
-class MyPred
+/*class MyPred
 {
 public:
-    MyPred(char x)
+    MyPred(int x)
             : _x(x)
     {
 
     }
     bool operator()(const Box& b)
     {
-        return b._num == _x;
+        return b._box == _x;
     }
 private:
-    char _x;
-};
+    int _x;
+};*/
 
 TCODColor asd(){
     TCODColor color(100,10,200);
@@ -128,18 +99,21 @@ void *get_approp_addr(struct sockaddr *sock_a);
 void CreateMap(std::string map, char *buf);
 char foo(char x, char *cnum);
 int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
-//int BoxPos(const std::vector<Box>& k, char t);
-void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, char *pos, int rndmoves);
-void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, char *pos, std::vector<int>& plus, int count);
-//void PlusPos(char *b, std::vector<int>& p);
-void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, char *pos, TCOD_key_t key, int rndmoves);
+int BoxPos(const std::vector<Box>& k, int t);
+void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd);
+void MovingCl(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes);
+void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, std::vector<int>& plus, int* c_ptr);
+void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key, int rnd);
+void ReadAndMovingCl(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key);
+void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos);
+int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int tnp6, int tnp7, int tnp8, int y, int rand);
 
 void Paint(int p);
 void GiveMeMap(int x);
 void GiveMeNewMap(TCOD_key_t k, int x);
 bool Situation(char *b, bool sit);
 
-#endif GAME_PROJ_MAIN_H
+#endif GAME_PROJ_H
 
 
 
