@@ -82,7 +82,7 @@ int main() {
                  int i = 6;
                  h = std::atoi(&c[0]);
                  w = std::atoi(&c[3]);
-                 timer = std::atoi(&c[(w + 1) * (h + 1) + 1]);
+                 timer = std::atoi(&c[strlen(c)-1]);
                  TCODConsole::root->initRoot(w, h + 2, "Cl1", false);
                  TCODConsole::root->setDefaultBackground(asd());
                  TCODConsole::root->clear();
@@ -150,7 +150,7 @@ int main() {
                  int i = 6;
                  h = std::atoi(&c[0]);
                  w = std::atoi(&c[3]);
-                 timer = std::atoi(&c[(w + 1) * (h + 1) + 1]);
+                 timer = std::atoi(&c[strlen(c)-1]);
                  TCODConsole::root->initRoot(w, h + 2, "Cl1", false);
                  TCODConsole::root->setDefaultBackground(asd());
                  TCODConsole::root->clear();

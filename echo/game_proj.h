@@ -13,7 +13,7 @@
 #include <time.h>
 
 #define SIZE_MAX 1024
-#define CLOCKS_PER_SEC 25000
+#define CLOCKS_PER_SEC 30000
 
 template <typename T> class TwoArray {
 public:
@@ -25,10 +25,7 @@ public:
              for (auto i = 0; i < _height; i++)
             _arr[i] = new T[_width];
             }
-/*    for (auto nc=0; nc < _width * _height; nc++) {
-        _arr[nc] = new T[_width * _height];
-    }
-  */
+
     ~TwoArray(){
 //      delete [] _arr;
     };
