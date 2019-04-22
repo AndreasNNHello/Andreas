@@ -20,7 +20,7 @@
 #include <algorithm>
 
 int main() {
-    int sttime = clock() / CLOCKS_PER_SEC;
+
     int sock, newsock1, newsock2, sz;
     struct sockaddr_in addr, cl_addr;
     struct sockaddr *cp;
@@ -144,7 +144,8 @@ int main() {
     int rndmoves;
     bool brake1 = true;
     bool brake2 = false;
-
+    int firstPlrPos, secondPlrPos;
+    int sttime = time(0);
 
     while (1) {
         if (newsock1 == -1 || newsock2 == -1) {
@@ -153,13 +154,12 @@ int main() {
 
         if (!WinPos(newNum) && (newNum[LosePos(newNum)]._num != 0)) {
             TCOD_key_t key;
-            int firstPlrPos, secondPlrPos;
-            sttime = clock() / CLOCKS_PER_SEC;
+
             std::cout << "started" << std::endl;
 
             if (brake1 == true) {
                 if ((recv(newsock1, (char *) &buf2, SIZE_MAX, 0)) == -1) {
-                    perror("Client doesn't want plaing");
+                    perror("Client doesn't want playing");
                 }
                 for (int i = 6; i < strlen(buf); i++)
                     if (buf[i] == '@') {
@@ -167,29 +167,15 @@ int main() {
                     } else if (buf[i] == '$') {
                         secondPlrPos = i;
                     }
-                std::cout << "test" << std::endl;
-                while (timer != 0 && key.vk != TCODK_NONE) {
-                    if (buf2[0] == 's') {
-                        timer = interval + timer1 - sttime;
-                        std::string nstr = std::to_string(timer);
-                        std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                        Convert(buf, nbuf, newNum, pos);
-                        send(newsock1, nbuf, strlen(nbuf), 0);
-                        send(newsock2, nbuf, strlen(nbuf), 0);
-                        printf("Map message sent\n");
-                    }
-                }
+                
                 if (timer == 0) {
                     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
                     Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
                     timer = timer1;
-                    interval = sttime;
+                    interval = time(0);
                     std::string nstr = std::to_string(timer);
                     std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
                     Convert(buf, nbuf, newNum, pos);
-                    send(newsock1, nbuf, strlen(nbuf), 0);
-                    send(newsock2, nbuf, strlen(nbuf), 0);
-                    printf("MapRandom message sent\n");
                     rndmoves = 0;
                     brake1 = false;
                     brake2 = true;
@@ -213,85 +199,86 @@ int main() {
 
                     MovingCl(buf, firstPlrPos, secondPlrPos, Plus, key, newNum);
                     timer = timer1;
-                    interval = sttime;
+                    interval = time(0);
                     std::string nstr = std::to_string(timer);
                     std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
                     Convert(buf, nbuf, newNum, pos);
-                    send(newsock1, nbuf, strlen(nbuf), 0);
-                    send(newsock2, nbuf, strlen(nbuf), 0);
-                    printf("MapMoving message sent\n");
                     key.vk = TCODK_NONE;
                     brake1 = false;
                     brake2 = true;
                 }
-            } else {
-            if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
-                perror("Client doesn't want plaing");
-            }
-            for (int i = 6; i < strlen(buf); i++)
-                if (buf[i] == '$') {
-                    firstPlrPos = i;
-                } else if (buf[i] == '@') {
-                    secondPlrPos = i;
-                }
-
-            while (timer != 0 && key.vk != TCODK_NONE) {
-                if (buf2[0] == 's') {
-                    timer = interval + timer1 - sttime;
+                if (time(0) != timer){
+                    std::cout << "first" << std::endl;
+                    timer = interval + timer1 - time(0) + sttime;
                     std::string nstr = std::to_string(timer);
                     std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
                     Convert(buf, nbuf, newNum, pos);
-                    send(newsock1, nbuf, strlen(nbuf), 0);
-                    send(newsock2, nbuf, strlen(nbuf), 0);
-                    printf("Map message sent\n");
                 }
-            }
-            if (timer == 0) {
-                rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-                Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
-                timer = timer1;
-                interval = sttime;
-                std::string nstr = std::to_string(timer);
-                std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                Convert(buf, nbuf, newNum, pos);
                 send(newsock1, nbuf, strlen(nbuf), 0);
                 send(newsock2, nbuf, strlen(nbuf), 0);
-                printf("MapRandom message sent\n");
-                rndmoves = 0;
-                brake2 = false;
-                brake1 = true;
-            } else if (buf2[0] == '1') {
-                switch (buf2[1]) {
-                    case '4':
-                        key.vk = TCODK_UP;
-                        break;
-                    case '7':
-                        key.vk = TCODK_DOWN;
-                        break;
-                    case '5':
-                        key.vk = TCODK_LEFT;
-                        break;
-                    case '6':
-                        key.vk = TCODK_RIGHT;
-                        break;
-                    default:
-                        break;
+                printf("Map message sent\n");
+            }
+            if (brake2 == true) {
+                if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
+                    perror("Client doesn't want playing");
                 }
+                for (int i = 6; i < strlen(buf); i++)
+                    if (buf[i] == '$') {
+                        firstPlrPos = i;
+                    } else if (buf[i] == '@') {
+                        secondPlrPos = i;
+                    }
 
-                MovingCl(buf, firstPlrPos, secondPlrPos, Plus, key, newNum);
-                timer = timer1;
-                interval = sttime;
-                std::string nstr = std::to_string(timer);
-                std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                Convert(buf, nbuf, newNum, pos);
+                if (timer == 0) {
+                    rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+                    Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+                    timer = timer1;
+                    interval = time(0);
+                    std::string nstr = std::to_string(timer);
+                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
+                    Convert(buf, nbuf, newNum, pos);
+                    rndmoves = 0;
+                    brake1 = false;
+                    brake2 = true;
+                } else if (buf2[0] == '1') {
+                    switch (buf2[1]) {
+                        case '4':
+                            key.vk = TCODK_UP;
+                            break;
+                        case '7':
+                            key.vk = TCODK_DOWN;
+                            break;
+                        case '5':
+                            key.vk = TCODK_LEFT;
+                            break;
+                        case '6':
+                            key.vk = TCODK_RIGHT;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    MovingCl(buf, firstPlrPos, secondPlrPos, Plus, key, newNum);
+                    timer = timer1;
+                    interval = time(0);
+                    std::string nstr = std::to_string(timer);
+                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
+                    Convert(buf, nbuf, newNum, pos);
+                    key.vk = TCODK_NONE;
+                    brake1 = false;
+                    brake2 = true;
+                }
+                if (time(0) != timer){
+                    std::cout << "second" << std::endl;
+                    timer = interval + timer1 - time(0) + sttime;
+                    std::string nstr = std::to_string(timer);
+                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
+                    Convert(buf, nbuf, newNum, pos);
+                }
                 send(newsock1, nbuf, strlen(nbuf), 0);
                 send(newsock2, nbuf, strlen(nbuf), 0);
-                printf("MapMoving message sent\n");
-                key.vk = TCODK_NONE;
-                brake2 = false;
-                brake1 = true;
+                printf("Map message sent\n");
             }
-        }
     } else if (newNum[LosePos(newNum)]._num == 0) {
         buf[0] = 'L';
         send(newsock1, buf, strlen(buf), 0);
