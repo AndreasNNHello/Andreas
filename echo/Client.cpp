@@ -26,7 +26,7 @@ int main() {
     }
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(51002);
+    addr.sin_port = htons(52002);
 
     if (connect(clsock, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
         perror("not connection");
@@ -38,13 +38,15 @@ int main() {
     mail = "start";
     std::strcpy(buf1, mail.c_str());
     send(clsock, (char *) &buf1, strlen(buf1), 0);
+
     int z;
     char c[SIZE_MAX];
-    
+    if ((z = recv(clsock, c, SIZE_MAX - 1, 0)) == -1) {
+        perror("error");
+    }
      while (situation) {
-         if ((z = recv(clsock, c, SIZE_MAX - 1, 0)) == -1) {
-             perror("error");
-         }
+
+         //std::cout << "wh" << std::endl;
 
          if (c[0] == 'L') {
              TCODConsole::initRoot(45, 45, "You Lose!", false, TCOD_RENDERER_GLSL);
@@ -72,6 +74,8 @@ int main() {
 
 
              TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+             //std::cout << "key" << std::endl;
+
              if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
                  char bufff1[SIZE_MAX];
                  std::string mail;
@@ -145,7 +149,7 @@ int main() {
                  mail = "start";
                  std::strcpy(buf3, mail.c_str());
                  send(clsock, (char *) &buf3, strlen(buf3), 0);
-                 
+                 //std::cout << "paint" << std::endl;
                  int w, h, timer;
                  int i = 6;
                  h = std::atoi(&c[0]);
@@ -205,7 +209,8 @@ int main() {
 
                  }
                  TCODConsole::root->flush();
-                 //write(1, c, z);
+                 //std::cout << "picture" << std::endl;
+                 write(1, c, z);
              }
          }   //TCODConsole::root->setChar(x, y,buff[i]);
      }

@@ -100,8 +100,8 @@ int BoxPos(const std::vector<Box>& k, int t);
 void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd);
 void MovingCl(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes);
 void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, std::vector<int>& plus, int* c_ptr);
-void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key, int rnd);
-void ReadAndMovingCl(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key);
+//void ReadAndMoving(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key, int rnd);
+//void ReadAndMovingCl(char *b, std::vector<Box>& boxes, const std::vector<int>& plus, TCOD_key_t key);
 void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos);
 int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int tnp6, int tnp7, int tnp8, int y, int rand);
 
