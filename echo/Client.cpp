@@ -26,7 +26,7 @@ int main() {
     }
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(52002);
+    addr.sin_port = htons(50002);
 
     if (connect(clsock, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
         perror("not connection");
@@ -41,7 +41,7 @@ int main() {
 
     int z;
     char c[SIZE_MAX];
-    if ((z = recv(clsock, c, SIZE_MAX - 1, 0)) == -1) {
+    if ((z = recv(clsock, c, SIZE_MAX, 0)) == -1) {
         perror("error");
     }
     h = std::atoi(&c[0]);
@@ -53,7 +53,7 @@ int main() {
     Paint(c);
 
     while (1) {
-        if ((z = recv(clsock, c, SIZE_MAX - 1, 0)) == -1) {
+        if ((z = recv(clsock, c, SIZE_MAX, 0)) == -1) {
             perror("error");
         }
         if (c[0] == 'L') {
@@ -72,8 +72,10 @@ int main() {
             TCODConsole::root->flush();
             std::cin.get();
         } else {
-            Paint(c);
-
+            if(z>0) {
+                std::cout << c[strlen(c)-1] << std::endl;
+                Paint(c);
+            }
             TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
             if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
                 char bufff1[SIZE_MAX];
@@ -83,8 +85,9 @@ int main() {
                 send(clsock, (char *) &bufff1, strlen(bufff1), 0);
             }
         }
-        return 0;
     }
+        return 0;
+
 }
 void Paint(char *c){
     int w, h, timer;
@@ -140,5 +143,5 @@ void Paint(char *c){
 
     }
     TCODConsole::root->flush();
-    std::cout << "painting" << std::endl;
+    std::cout << "painting" << timer << std::endl;
 }

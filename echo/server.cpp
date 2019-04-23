@@ -20,7 +20,6 @@
 #include <algorithm>
 
 int main() {
-
     int sock, newsock1, newsock2, sz;
     struct sockaddr_in addr, cl_addr;
     struct sockaddr *cp;
@@ -67,7 +66,7 @@ int main() {
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(52002);
+    addr.sin_port = htons(50002);
 
     if (bind(sock, (struct sockaddr *) &addr, sz) == -1) {
         perror("no binding");
@@ -116,9 +115,7 @@ int main() {
               get_approp_addr((struct sockaddr *) &cl_addr),
               address_pres, sizeof address_pres);
     printf("server: Client connection from %s\n", address_pres);
-    std::string nstr = std::to_string(count);
-    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-    Convert(buf, nbuf, newNum, pos);
+    Convert(buf, nbuf, newNum, pos, count);
     send(newsock1, nbuf, strlen(nbuf), 0);
     printf("Map message sent\n");
 
@@ -132,9 +129,7 @@ int main() {
               get_approp_addr((struct sockaddr *) &cl_addr),
               address_pres, sizeof address_pres);
     printf("server: Client connection from %s\n", address_pres);
-    std::string nstr1 = std::to_string(count);
-    std::strcpy(&buf[strlen(buf) - 1], nstr1.c_str());
-    Convert(buf, nbuf, newNum, pos);
+    Convert(buf, nbuf, newNum, pos, count);
     send(newsock2, nbuf, strlen(nbuf), 0);
     printf("Map message sent\n");
 
@@ -151,31 +146,34 @@ int main() {
         if (newsock1 == -1 || newsock2 == -1) {
             perror("no accept");
         }
-
         if (!WinPos(newNum) && (newNum[LosePos(newNum)]._num != 0)) {
             TCOD_key_t key;
 
-            std::cout << "started" << std::endl;
+            //std::cout << "started" << std::endl;
 
             if (brake1 == true) {
-                if ((recv(newsock1, (char *) &buf2, SIZE_MAX, 0)) == -1) {
+                /*if ((recv(newsock1, (char *) &buf2, SIZE_MAX, 0)) == -1) {
                     perror("Client doesn't want playing");
-                }
+                }*/
                 for (int i = 6; i < strlen(buf); i++)
                     if (buf[i] == '@') {
                         firstPlrPos = i;
                     } else if (buf[i] == '$') {
                         secondPlrPos = i;
                     }
-                
+
                 if (timer == 0) {
+                    std::cout << "rand first" << std::endl;
                     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
                     Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
                     timer = timer1;
-                    interval = time(0);
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    interval = time(0)-sttime;
+                    Convert(buf, nbuf, newNum, pos, timer);
+                    send(newsock1, nbuf, strlen(nbuf), 0);
+                    send(newsock2, nbuf, strlen(nbuf), 0);
+                    std::cout << nbuf[strlen(nbuf)-1] << std::endl;
+                    //printf("Map message sent\n");
+                    //write(sock, buf, strlen(buf));
                     rndmoves = 0;
                     brake1 = false;
                     brake2 = true;
@@ -199,29 +197,29 @@ int main() {
 
                     MovingCl(buf, firstPlrPos, secondPlrPos, Plus, key, newNum);
                     timer = timer1;
-                    interval = time(0);
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    interval = time(0)-sttime;
+                    Convert(buf, nbuf, newNum, pos, timer);
                     key.vk = TCODK_NONE;
                     brake1 = false;
                     brake2 = true;
                 }
-                if (time(0) != timer){
+
+                if (((interval + timer1 - time(0) + sttime)%10) != (timer%10)){
                     std::cout << "first" << std::endl;
                     timer = interval + timer1 - time(0) + sttime;
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    Convert(buf, nbuf, newNum, pos, timer);
+                    send(newsock1, nbuf, strlen(nbuf), 0);
+                    send(newsock2, nbuf, strlen(nbuf), 0);
+                    std::cout << nbuf[strlen(nbuf)-1] << std::endl;
+                    //printf("Map message sent\n");
                 }
-                send(newsock1, nbuf, strlen(nbuf), 0);
-                send(newsock2, nbuf, strlen(nbuf), 0);
-                printf("Map message sent\n");
             }
             if (brake2 == true) {
-                if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
+                /*if ((recv(newsock2, (char *) &buf2, SIZE_MAX, 0)) == -1) {
                     perror("Client doesn't want playing");
-                }
+                }*/
+                //std::cout << "continue" << std::endl;
+
                 for (int i = 6; i < strlen(buf); i++)
                     if (buf[i] == '$') {
                         firstPlrPos = i;
@@ -229,17 +227,21 @@ int main() {
                         secondPlrPos = i;
                     }
 
+
                 if (timer == 0) {
+                    std::cout << "rand second" << std::endl;
                     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
                     Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
                     timer = timer1;
-                    interval = time(0);
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    interval = time(0)-sttime;
+                    Convert(buf, nbuf, newNum, pos, timer);
+                    send(newsock1, nbuf, strlen(nbuf), 0);
+                    send(newsock2, nbuf, strlen(nbuf), 0);
+                    std::cout << nbuf[strlen(nbuf)-1] << std::endl;
+                    //printf("Map message sent\n");
                     rndmoves = 0;
-                    brake1 = false;
-                    brake2 = true;
+                    brake1 = true;
+                    brake2 = false;
                 } else if (buf2[0] == '1') {
                     switch (buf2[1]) {
                         case '4':
@@ -260,33 +262,48 @@ int main() {
 
                     MovingCl(buf, firstPlrPos, secondPlrPos, Plus, key, newNum);
                     timer = timer1;
-                    interval = time(0);
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    interval = time(0)-sttime;
+                    Convert(buf, nbuf, newNum, pos, timer);
                     key.vk = TCODK_NONE;
-                    brake1 = false;
-                    brake2 = true;
+                    brake1 = true;
+                    brake2 = false;
                 }
-                if (time(0) != timer){
+
+                if (((interval + timer1 - time(0) + sttime)%10) != (timer%10)){
                     std::cout << "second" << std::endl;
                     timer = interval + timer1 - time(0) + sttime;
-                    std::string nstr = std::to_string(timer);
-                    std::strcpy(&buf[strlen(buf) - 1], nstr.c_str());
-                    Convert(buf, nbuf, newNum, pos);
+                    Convert(buf, nbuf, newNum, pos, timer);
+                    send(newsock1, nbuf, strlen(nbuf), 0);
+                    send(newsock2, nbuf, strlen(nbuf), 0);
+                    std::cout << nbuf[strlen(nbuf)-1] << std::endl;
+                    //printf("Map message sent\n");
                 }
-                send(newsock1, nbuf, strlen(nbuf), 0);
-                send(newsock2, nbuf, strlen(nbuf), 0);
-                printf("Map message sent\n");
+
             }
     } else if (newNum[LosePos(newNum)]._num == 0) {
-        buf[0] = 'L';
-        send(newsock1, buf, strlen(buf), 0);
-        send(newsock2, buf, strlen(buf), 0);
+            if(brake1 == true){
+                buf[0] = 'L';
+                send(newsock1, buf, strlen(buf), 0);
+                buf[0] = 'W';
+                send(newsock2, buf, strlen(buf), 0);
+            } else {
+                buf[0] = 'W';
+                send(newsock1, buf, strlen(buf), 0);
+                buf[0] = 'L';
+                send(newsock2, buf, strlen(buf), 0);
+            }
     } else if (WinPos(newNum)) {
-        buf[0] = 'W';
-        send(newsock1, buf, strlen(buf), 0);
-        send(newsock2, buf, strlen(buf), 0);
+            if(brake1 == true){
+                buf[0] = 'W';
+                send(newsock1, buf, strlen(buf), 0);
+                buf[0] = 'L';
+                send(newsock2, buf, strlen(buf), 0);
+            } else {
+                buf[0] = 'L';
+                send(newsock1, buf, strlen(buf), 0);
+                buf[0] = 'W';
+                send(newsock2, buf, strlen(buf), 0);
+            }
     }
 }
      return 0;
@@ -771,7 +788,7 @@ bool WinPos(const std::vector<Box>& m){
     }
 }
 
-void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos){
+void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos, int timer){
     std::strcpy(nb, b);
     for (int i = 6; i < strlen(nb); i++){
         for (auto p : boxes){
@@ -780,16 +797,10 @@ void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos){
 }
     }
     }
+    std::string nstr = std::to_string(timer);
+    std::strcpy(&b[strlen(b) - 1], nstr.c_str());
 }
 
-/*char foo(const std::vector<Box>& x, char y){
-    for (auto &n : x){
-        if (n._num == y){
-            return n._num;
-        }
-    }
-}
-*/
 int BoxPos(const std::vector<Box>& k, int t) {
     for (auto i = 0; i < k.size(); i++) {
         if (k[i]._box == t)
