@@ -17,7 +17,7 @@
 
 int main() {
     int clsock;
-    int w, h, timer;
+    int w, h;
     struct sockaddr_in addr;
 
     clsock = socket(AF_INET, SOCK_STREAM, 0);
@@ -73,9 +73,9 @@ int main() {
             std::cin.get();
         } else {
             if(z>0) {
-                std::cout << c[strlen(c)-1] << std::endl;
                 Paint(c);
             }
+        }
             TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
             if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
                 char bufff1[SIZE_MAX];
@@ -84,7 +84,6 @@ int main() {
                 std::strcpy(bufff1, mail.c_str());
                 send(clsock, (char *) &bufff1, strlen(bufff1), 0);
             }
-        }
     }
         return 0;
 
@@ -131,7 +130,6 @@ void Paint(char *c){
                         TCODConsole::root->setCharForeground(x, y, asd());
                         break;
                     default:
-                        //char chBox = foo(z, c);
                         TCODConsole::root->setChar(x, y, v);
                         TCODConsole::root->setCharBackground(x, y, colBox());
                         TCODConsole::root->setCharForeground(x, y, colNum());

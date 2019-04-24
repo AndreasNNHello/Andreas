@@ -17,9 +17,8 @@
 
 int main() {
     int clsock;
-    int w, h, timer;
+    int w, h;
     struct sockaddr_in addr;
-    bool situation = true;
 
     clsock = socket(AF_INET, SOCK_STREAM, 0);
     if (clsock == -1) {
@@ -76,73 +75,72 @@ int main() {
             if(z>0) {
                 Paint(c);
             }
-
-            TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
-            if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
-                char bufff1[SIZE_MAX];
-                std::string mail;
-                mail = std::to_string(key.vk);
-                std::strcpy(bufff1, mail.c_str());
-                send(clsock, (char *) &bufff1, strlen(bufff1), 0);
-            }
+        }
+        TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+        if (key.vk == TCODK_UP || key.vk == TCODK_DOWN || key.vk == TCODK_LEFT || key.vk == TCODK_RIGHT) {
+            std::cout << "arrow" << std::endl;
+            char bufff1[SIZE_MAX];
+            std::string mail;
+            mail = std::to_string(key.vk);
+            std::strcpy(bufff1, mail.c_str());
+            send(clsock, (char *) &bufff1, sizeof(bufff1), 0);
         }
     }
-        return 0;
+    return 0;
 
 }
-    void Paint(char *c){
-        int w, h, timer;
-        int i = 6;
-        h = std::atoi(&c[0]);
-        w = std::atoi(&c[3]);
-        timer = std::atoi(&c[strlen(c)-1]);
-        std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
-        TCODConsole::root->print(1, 1, strtime.c_str());
-        for (auto y = 2; y < h + 2; y++) {
-            for (auto x = 0; x < w; x++) {
-                if (c[i] == '\n') {
-                    i++;
-                    x--;
-                } else {
-                    auto v = c[i];
-                    switch (v) {
-                        case '@':
-                            TCODConsole::root->setChar(x, y, c[i++]);
-                            TCODConsole::root->setCharBackground(x, y, colPlayer());
-                            TCODConsole::root->setCharForeground(x, y, colNum());
-                            break;
-                        case '$':
-                            TCODConsole::root->setChar(x, y, c[i++]);
-                            TCODConsole::root->setCharBackground(x, y, colPlayer());
-                            TCODConsole::root->setCharForeground(x, y, colNum());
-                            break;
-                        case '+':
-                            TCODConsole::root->setChar(x, y, c[i++]);
-                            TCODConsole::root->setCharBackground(x, y, colWinPos());
-                            TCODConsole::root->setCharForeground(x, y, colNum());
-                            break;
-                        case '#':
-                            TCODConsole::root->setChar(x, y, c[i++]);
-                            TCODConsole::root->setCharBackground(x, y, colWall());
-                            TCODConsole::root->setCharForeground(x, y, colNum());
-                            break;
-                        case ' ':
-                            TCODConsole::root->setChar(x, y, c[i++]);
-                            TCODConsole::root->setCharBackground(x, y, asd());
-                            TCODConsole::root->setCharForeground(x, y, asd());
-                            break;
-                        default:
-                            //char chBox = foo(z, c);
-                            TCODConsole::root->setChar(x, y, v);
-                            TCODConsole::root->setCharBackground(x, y, colBox());
-                            TCODConsole::root->setCharForeground(x, y, colNum());
-                            i++;
-                            break;
-                    }
+void Paint(char *c){
+    int w, h, timer;
+    int i = 6;
+    h = std::atoi(&c[0]);
+    w = std::atoi(&c[3]);
+    timer = std::atoi(&c[strlen(c)-1]);
+    std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
+    TCODConsole::root->print(1, 1, strtime.c_str());
+    for (auto y = 2; y < h + 2; y++) {
+        for (auto x = 0; x < w; x++) {
+            if (c[i] == '\n') {
+                i++;
+                x--;
+            } else {
+                auto v = c[i];
+                switch (v) {
+                    case '@':
+                        TCODConsole::root->setChar(x, y, c[i++]);
+                        TCODConsole::root->setCharBackground(x, y, colPlayer());
+                        TCODConsole::root->setCharForeground(x, y, colNum());
+                        break;
+                    case '$':
+                        TCODConsole::root->setChar(x, y, c[i++]);
+                        TCODConsole::root->setCharBackground(x, y, colPlayer());
+                        TCODConsole::root->setCharForeground(x, y, colNum());
+                        break;
+                    case '+':
+                        TCODConsole::root->setChar(x, y, c[i++]);
+                        TCODConsole::root->setCharBackground(x, y, colWinPos());
+                        TCODConsole::root->setCharForeground(x, y, colNum());
+                        break;
+                    case '#':
+                        TCODConsole::root->setChar(x, y, c[i++]);
+                        TCODConsole::root->setCharBackground(x, y, colWall());
+                        TCODConsole::root->setCharForeground(x, y, colNum());
+                        break;
+                    case ' ':
+                        TCODConsole::root->setChar(x, y, c[i++]);
+                        TCODConsole::root->setCharBackground(x, y, asd());
+                        TCODConsole::root->setCharForeground(x, y, asd());
+                        break;
+                    default:
+                        TCODConsole::root->setChar(x, y, v);
+                        TCODConsole::root->setCharBackground(x, y, colBox());
+                        TCODConsole::root->setCharForeground(x, y, colNum());
+                        i++;
+                        break;
                 }
             }
-
         }
-        TCODConsole::root->flush();
-        std::cout << "painting" << timer << std::endl;
+
     }
+    TCODConsole::root->flush();
+    std::cout << "painting" << timer << std::endl;
+}

@@ -14,47 +14,81 @@
 
 #define SIZE_MAX 20024
 
-template <typename T> class TwoArray {
-public:
-    TwoArray() = default;
-    TwoArray(const int h, const int w)
-            : _height(h), _width(w)
-            {
-            _arr = new T *[_height];
-             for (auto i = 0; i < _height; i++)
-            _arr[i] = new T[_width];
-            }
-
-    ~TwoArray(){
-//      delete [] _arr;
-    };
-
-private:
-
-    T **_arr;
-    int _width, _height;
-};
-
 struct Box{
     int _box; // coordinates
     int _num; // char on box
     bool _win;
 };
 
-/*class MyPred
-{
+
+/*class Time{
 public:
-    MyPred(int x)
-            : _x(x)
+    Time() = default;
+    Time(int t)
+            : _t(t)
     {
 
     }
-    bool operator()(const Box& b)
-    {
-        return b._box == _x;
+
+    GetCurrentTime(){
+        timer = interval + timer1 - time(0) + sttime;
     }
+
+    Reset(){
+        timer = timer1;
+        interval = time(0) - sttime;
+    }
+
 private:
-    int _x;
+    int _t;
+};
+
+class Player: public Time{
+public:
+    Player() = default;
+    Player(int d, int b, bool br)
+            : _dog(d), _baks(b), _brake(br)
+    {
+
+    }
+
+    Turn(){
+        if (buf2[0] == '1') {
+            switch (buf2[1]) {
+                case '4':
+                    key.vk = TCODK_UP;
+                    break;
+                case '7':
+                    key.vk = TCODK_DOWN;
+                    break;
+                case '5':
+                    key.vk = TCODK_LEFT;
+                    break;
+                case '6':
+                    key.vk = TCODK_RIGHT;
+                    break;
+                default:
+                    break;
+            }
+
+            Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+            Time::Reset();
+            key.vk = TCODK_NONE;
+    }
+
+    Random(){
+        std::cout << "rand first" << std::endl;
+        rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+        Time::Reset();
+        rndmoves = 0;
+    }
+
+private:
+    int _dog;
+    int _baks;
+    bool _brake;
+
 };*/
 
 TCODColor asd(){
@@ -95,9 +129,8 @@ void CreateMap(std::string map, char *buf);
 int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
 int BoxPos(const std::vector<Box>& k, int t);
 void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd);
-void MovingCl(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes);
 void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, std::vector<int>& plus, int* c_ptr);
-void Convert(char* b, char* nb, const std::vector<Box>& boxes, char *pos, int timer);
+void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer);
 int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int tnp6, int tnp7, int tnp8, int y, int rand);
 
 void Paint(char *c);
