@@ -30,8 +30,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/server.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="132" column="19" lean-forward="true" selection-start-line="132" selection-start-column="19" selection-end-line="132" selection-end-column="19" />
+            <state relative-caret-position="359">
+              <caret line="735" lean-forward="true" selection-start-line="735" selection-end-line="735" />
               <folding>
                 <element signature="e#0#22#0" expanded="true" />
               </folding>
@@ -42,8 +42,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/game_proj.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="124" column="39" lean-forward="true" selection-start-line="124" selection-start-column="39" selection-end-line="124" selection-end-column="39" />
+            <state relative-caret-position="328">
+              <caret line="53" column="49" lean-forward="true" selection-start-line="53" selection-start-column="49" selection-end-line="53" selection-end-column="49" />
             </state>
           </provider>
         </entry>
@@ -51,8 +51,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Client.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="66" column="43" lean-forward="true" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
+            <state relative-caret-position="255">
+              <caret line="74" column="21" lean-forward="true" selection-start-line="74" selection-start-column="21" selection-end-line="74" selection-end-column="21" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -63,11 +63,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Client2.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="14" column="22" lean-forward="true" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
-              <folding>
-                <element signature="e#0#23#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="180">
+              <caret line="12" column="18" lean-forward="true" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -89,6 +86,8 @@
       <find>cp</find>
       <find>colourVec</find>
       <find>buf1</find>
+      <find>sz</find>
+      <find>BoxPos</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -102,8 +101,8 @@
         <option value="$PROJECT_DIR$/cmake-build-debug/Maps/Field.txt" />
         <option value="$PROJECT_DIR$/Client2.cpp" />
         <option value="$PROJECT_DIR$/Client.cpp" />
-        <option value="$PROJECT_DIR$/server.cpp" />
         <option value="$PROJECT_DIR$/game_proj.h" />
+        <option value="$PROJECT_DIR$/server.cpp" />
       </list>
     </option>
   </component>
@@ -200,12 +199,12 @@
       <workItem from="1555573189277" duration="17093000" />
       <workItem from="1555593217306" duration="43048000" />
       <workItem from="1555918175099" duration="10576000" />
-      <workItem from="1555933365137" duration="62399000" />
+      <workItem from="1555933365137" duration="81987000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="371180000" />
+    <option name="totallyTimeSpent" value="390768000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -462,10 +461,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/include/stdlib.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="132" column="8" selection-start-line="132" selection-start-column="8" selection-end-line="132" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/server.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="132" column="19" lean-forward="true" selection-start-line="132" selection-start-column="19" selection-end-line="132" selection-end-column="19" />
+        <state relative-caret-position="359">
+          <caret line="735" lean-forward="true" selection-start-line="735" selection-end-line="735" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
@@ -474,15 +480,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/game_proj.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="124" column="39" lean-forward="true" selection-start-line="124" selection-start-column="39" selection-end-line="124" selection-end-column="39" />
+        <state relative-caret-position="328">
+          <caret line="53" column="49" lean-forward="true" selection-start-line="53" selection-start-column="49" selection-end-line="53" selection-end-column="49" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Client.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="66" column="43" lean-forward="true" selection-start-line="66" selection-start-column="43" selection-end-line="66" selection-end-column="43" />
+        <state relative-caret-position="255">
+          <caret line="74" column="21" lean-forward="true" selection-start-line="74" selection-start-column="21" selection-end-line="74" selection-end-column="21" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
@@ -491,11 +497,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Client2.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
-          <caret line="14" column="22" lean-forward="true" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="180">
+          <caret line="12" column="18" lean-forward="true" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
         </state>
       </provider>
     </entry>

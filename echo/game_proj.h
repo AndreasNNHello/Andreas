@@ -21,7 +21,7 @@ struct Box{
 };
 
 
-/*class Time{
+class Time{
 public:
     Time() = default;
     Time(int t)
@@ -30,15 +30,10 @@ public:
 
     }
 
-    GetCurrentTime(){
-        timer = interval + timer1 - time(0) + sttime;
-    }
+    int GetCurrentTime(int, int, int);
+    void Reset(int, int, int, int);
 
-    Reset(){
-        timer = timer1;
-        interval = time(0) - sttime;
-    }
-
+    //~Time();
 private:
     int _t;
 };
@@ -46,50 +41,29 @@ private:
 class Player: public Time{
 public:
     Player() = default;
-    Player(int d, int b, bool br)
-            : _dog(d), _baks(b), _brake(br)
+    Player(char f, char s, bool br)
+            : _first(f), _second(s), _brake(br)
     {
 
     }
 
-    Turn(){
-        if (buf2[0] == '1') {
-            switch (buf2[1]) {
-                case '4':
-                    key.vk = TCODK_UP;
-                    break;
-                case '7':
-                    key.vk = TCODK_DOWN;
-                    break;
-                case '5':
-                    key.vk = TCODK_LEFT;
-                    break;
-                case '6':
-                    key.vk = TCODK_RIGHT;
-                    break;
-                default:
-                    break;
-            }
-
-            Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
-            Time::Reset();
-            key.vk = TCODK_NONE;
+    void Turn(char *, char *, int, int, const std::vector<int>&, std::vector<Box>&, int, int, int, int, int, int, Time);
+    void RandomTurn(char *, int, int, const std::vector<int>& , std::vector<Box>& , int , int, int, int, int, int, Time);
+    void WhoIsWho(char , char , char *, int, int);
+    void Send(char *, char *, const std::vector<Box>&, int, int, int);
+    static void Lose(char *, const std::vector<Box>&, Player, int, int);
+    static void Win(char *, const std::vector<Box>&, Player, int, int);
+    void setBrake(bool f) {
+        _brake = f;
     }
 
-    Random(){
-        std::cout << "rand first" << std::endl;
-        rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
-        Time::Reset();
-        rndmoves = 0;
-    }
-
+    //~Player();
 private:
-    int _dog;
-    int _baks;
+    char _first;
+    char _second;
     bool _brake;
 
-};*/
+};
 
 TCODColor asd(){
     TCODColor color(100,10,200);
@@ -125,10 +99,10 @@ bool WinPos(const std::vector<Box>& m);
 int LosePos(const std::vector<Box>& x);
 std::string RandMap(const std::map<int, std::string> &x);
 void *get_approp_addr(struct sockaddr *sock_a);
-void CreateMap(std::string map, char *buf);
+int CreateMap(std::map<int, std::string> maps, char *buf);
 int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
 int BoxPos(const std::vector<Box>& k, int t);
-void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd);
+void Moving(char *buf, int fp, int sp, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd, int w, int h);
 void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, std::vector<int>& plus, int* c_ptr);
 void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer);
 int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int tnp6, int tnp7, int tnp8, int y, int rand);

@@ -21,15 +21,16 @@
 #include <fcntl.h>
 
 int main() {
-    int sock, newsock1, newsock2, sz;
+    int sock, newsock1, newsock2, sz, count, turn = 0, Score,
+        timer1, interval = 0, timer, sttime, firstPlrPos, secondPlrPos;
     struct sockaddr_in addr, cl_addr;
     struct sockaddr *cp;
-
-    char buf2[SIZE_MAX] = {0};
-    char buf3[SIZE_MAX] = {0};
+    bool brake1 = true;
+    bool brake2 = false;
     char buf[SIZE_MAX] = {0};
+    char buf2[SIZE_MAX] = {0};
+    //char buf3[SIZE_MAX] = {0};
     char nbuf[SIZE_MAX] = {0};
-
     std::string nameMap;
     std::map<int, std::string> maps;
 
@@ -38,12 +39,9 @@ int main() {
 
     std::vector<int> Plus;
     std::vector<Box> newNum;
-    int count;
 
     socklen_t cladrrsz = sizeof(cl_addr);
     char address_pres[INET6_ADDRSTRLEN];
-
-    int turn = 0, Score;
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -65,20 +63,18 @@ int main() {
     }
 
 
-    int n = -1;
+    /*int n = -1;
     std::string it;
 
     DIR *dir;
     struct dirent *ent;
     if ((dir = opendir("/home/andreas/CLionProjects/echo/cmake-build-debug/Maps/")) != NULL) {
-        /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             it = ent->d_name;
             maps.insert(std::pair<int, std::string>(n++, it));
         }
         closedir(dir);
     } else {
-        /* could not open directory */
         perror("");
         return EXIT_FAILURE;
     }
@@ -86,9 +82,9 @@ int main() {
 
     maps.erase(-1);
     maps.erase(0);
-    std::string tmp2 = "Maps/" + RandMap(maps);
+    std::string tmp2 = "Maps/" + RandMap(maps);*/
 
-    CreateMap(tmp2, buf);
+    CreateMap(maps, buf);
     int h = std::atoi(&buf[0]);
     int w = std::atoi(&buf[3]);
     CreateBoxAndPlus(newNum, buf, w, h, Plus, &count);
@@ -122,21 +118,69 @@ int main() {
     send(newsock2, nbuf, strlen(nbuf), 0);
     printf("Map message sent\n");
 
-    int timer1 = count;
-    int interval = 0;
-    int timer = count;
-    int rndmoves;
-    bool brake1 = true;
-    bool brake2 = false;
-    int firstPlrPos, secondPlrPos;
-    int sttime = time(0);
-    TCOD_key_t key;
-
+    timer1 = count;
+    interval = 0;
+    timer = count;
+    sttime = time(0);
+    //TCOD_key_t key;
+    //int rndmoves;
     while (1) {
         if (newsock1 == -1 || newsock2 == -1) {
             perror("no accept");
         }
+
+        Time timer2(count);
+        Player pl1('@', '$', brake1);
+        Player pl2('$', '@', brake2);
+
         int z;
+
+        if (timer2.GetCurrentTime(interval, timer1, sttime) != timer){
+            if (brake1 == true) {
+            if (z = (recv(newsock1, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
+                perror("recv1");
+            }
+                pl1.WhoIsWho('@', '$', buf, firstPlrPos, secondPlrPos);
+                timer = timer2.GetCurrentTime(interval, timer1, sttime);
+                if (timer == 0){
+                    pl1.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, timer, timer1, interval, sttime, timer2);
+                    pl1.setBrake(false);
+                    pl2.setBrake(true);
+                }
+                if (z > 0) {
+                    pl1.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, timer, timer1, interval, sttime, timer2);
+                    pl1.setBrake(false);
+                    pl2.setBrake(true);
+                }
+                pl1.Send(buf, nbuf, newNum, newsock1, newsock2, timer);
+                std::cout << "send 1" << std::endl;
+            }
+            if (brake2 == true) {
+                if (z = (recv(newsock2, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
+                    perror("recv2");
+                }
+                pl2.WhoIsWho('$', '@', buf, firstPlrPos, secondPlrPos);
+                timer = timer2.GetCurrentTime(interval, timer1, sttime);
+                if (timer == 0){
+                    pl2.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, timer, timer1, interval, sttime, timer2);
+                    pl1.setBrake(true);
+                    pl2.setBrake(false);
+                }
+                if (z > 0) {
+                    pl2.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, timer, timer1, interval, sttime, timer2);
+                    pl1.setBrake(true);
+                    pl2.setBrake(false);
+                }
+                pl2.Send(buf, nbuf, newNum, newsock1, newsock2, timer);
+                std::cout << "send 2" << std::endl;
+            }
+            Player::Lose(buf, newNum, pl1, newsock1, newsock2);
+            Player::Win(buf, newNum, pl1, newsock1, newsock2);
+        }
+
+
+
+        /*int z;
         if ((interval + timer1 - time(0) + sttime) != timer) {
             if (brake1 == true) {
                 if (z = (recv(newsock1, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
@@ -152,7 +196,7 @@ int main() {
                 if (timer == 0) {
                     std::cout << "rand first" << std::endl;
                     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-                    Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+                    Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves, w, h);
                     timer = timer1;
                     interval = time(0) - sttime;
                     rndmoves = 0;
@@ -178,7 +222,7 @@ int main() {
                                 break;
                         }
 
-                        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+                        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves, w, h);
                         timer = timer1;
                         interval = time(0) - sttime;
                         key.vk = TCODK_NONE;
@@ -195,7 +239,7 @@ int main() {
             }
 
             if (brake2 == true) {
-                if (z = (recv(newsock2, (char *) &buf3, SIZE_MAX, MSG_DONTWAIT)) == -1) {
+                if (z = (recv(newsock2, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
                     perror("recv2");
                 }
                 for (int i = 6; i < strlen(buf); i++)
@@ -208,7 +252,7 @@ int main() {
                 if (timer == 0) {
                     std::cout << "rand first" << std::endl;
                     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
-                    Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+                    Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves, w, h);
                     timer = timer1;
                     interval = time(0) - sttime;
                     rndmoves = 0;
@@ -216,8 +260,8 @@ int main() {
                     brake2 = false;
                 }
 
-                    if (buf3[0] == '1') {
-                        switch (buf3[1]) {
+                    if (buf2[0] == '1') {
+                        switch (buf2[1]) {
                             case '4':
                                 key.vk = TCODK_UP;
                                 break;
@@ -234,7 +278,7 @@ int main() {
                                 break;
                         }
 
-                        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves);
+                        Moving(buf, firstPlrPos, secondPlrPos, Plus, key, newNum, rndmoves, w, h);
                         timer = timer1;
                         interval = time(0) - sttime;
                         key.vk = TCODK_NONE;
@@ -246,7 +290,7 @@ int main() {
             send(newsock1, nbuf, sizeof(nbuf), 0);
             send(newsock2, nbuf, sizeof(nbuf), 0);
             printf("Map message sent\n");
-            memset(buf3, 0, sizeof(buf3));
+            memset(buf2, 0, sizeof(buf2));
             }
         }
 
@@ -276,7 +320,7 @@ int main() {
                     buf[0] = 'W';
                     send(newsock2, buf, strlen(buf), 0);
                 }
-            }
+            }*/
 
     }
      return 0;
@@ -303,8 +347,30 @@ void *get_approp_addr(struct sockaddr *sock_a)
     return &(((struct sockaddr_in6*)sock_a)->sin6_addr);
 }
 
-void CreateMap(std::string map, char *buf) {
-    std::ifstream in(map);
+int CreateMap(std::map<int, std::string> maps, char *buf) {
+    int n = -1;
+    std::string it;
+
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir("/home/andreas/CLionProjects/echo/cmake-build-debug/Maps/")) != NULL) {
+        /* print all the files and directories within directory */
+        while ((ent = readdir(dir)) != NULL) {
+            it = ent->d_name;
+            maps.insert(std::pair<int, std::string>(n++, it));
+        }
+        closedir(dir);
+    } else {
+        /* could not open directory */
+        perror("");
+        return EXIT_FAILURE;
+    }
+
+    maps.erase(-1);
+    maps.erase(0);
+    std::string tmp2 = "Maps/" + RandMap(maps);
+
+    std::ifstream in(tmp2);
     std::string str;
     std::string str1;
     while (!in.eof()) {
@@ -313,6 +379,7 @@ void CreateMap(std::string map, char *buf) {
         str1 += str;
     }
     std::strcpy(buf, str1.c_str());
+    return 0;
 }
 
 
@@ -348,38 +415,36 @@ int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m){
     }
 }
 
-void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd) {
-    int h = std::atoi(&buf[0]);
-    int w = std::atoi(&buf[3]);
+void Moving(char *buf, int fp, int sp, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd, int w, int h) {
     int rand;
 
-    int tnp = x - w - 1;
-    int tnp2 = x + w + 1;
-    int tnp3 = x - 1;
-    int tnp4 = x + 1;
-    int tnp5 = x - w * 2 - 2;
-    int tnp6 = x + w * 2 + 2;
-    int tnp7 = x - 2;
-    int tnp8 = x + 2;
+    int tnp = fp - w - 1;
+    int tnp2 = fp + w + 1;
+    int tnp3 = fp - 1;
+    int tnp4 = fp + 1;
+    int tnp5 = fp - w * 2 - 2;
+    int tnp6 = fp + w * 2 + 2;
+    int tnp7 = fp - 2;
+    int tnp8 = fp + 2;
 
     if (rnd != 0) {
-        rand = ControlRand(buf, tnp, tnp2, tnp3, tnp4, tnp5, tnp6, tnp7, tnp8, y, rnd);
+        rand = ControlRand(buf, tnp, tnp2, tnp3, tnp4, tnp5, tnp6, tnp7, tnp8, sp, rnd);
     }
     if (key.vk == TCODK_UP || rand == 1) {
-        if (buf[tnp] != '#' && buf[tnp] != buf[y]){
+        if (buf[tnp] != '#' && buf[tnp] != buf[sp]){
             if (buf[tnp] == 'o') {
-                if (buf[tnp5] != '#' && buf[tnp5] != 'o' && buf[tnp5] != buf[y]) {
+                if (buf[tnp5] != '#' && buf[tnp5] != 'o' && buf[tnp5] != buf[sp]) {
                     boxes[BoxPos(boxes, tnp)]._box -= (w+1);
                     buf[tnp5] = buf[tnp];
-                    buf[tnp] = buf[x];
-                    buf[x] = ' ';
-                    x -= (w+1);
+                    buf[tnp] = buf[fp];
+                    buf[fp] = ' ';
+                    fp -= (w+1);
                     for (auto a : plus) {
                         if(a == tnp5){
                             boxes[BoxPos1(boxes, plus)]._win = true;
                         }
-                        if ((x+w+1) == a) {
-                            buf[x+w+1] = '+';
+                        if ((fp+w+1) == a) {
+                            buf[fp+w+1] = '+';
                         }
                         if (tnp == a){
                             boxes[BoxPos(boxes, tnp5)]._win = false;
@@ -389,12 +454,12 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
                 }
             }
             else  {
-                buf[tnp] = buf[x];
-                buf[x] = ' ';
-                x -= (w+1);
+                buf[tnp] = buf[fp];
+                buf[fp] = ' ';
+                fp -= (w+1);
                 for (auto a : plus) {
-                    if ((x+w+1) == a) {
-                        buf[x+w+1] = '+';
+                    if ((fp+w+1) == a) {
+                        buf[fp+w+1] = '+';
                     }
                 }
             }
@@ -402,20 +467,20 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
     }
 
     else if (key.vk == TCODK_DOWN || rand == 2) {
-        if (buf[tnp2] != '#' && buf[tnp2] != buf[y]) {
+        if (buf[tnp2] != '#' && buf[tnp2] != buf[sp]) {
             if (buf[tnp2] == 'o') {
-                if (buf[tnp6] != '#' && buf[tnp6] != 'o' && buf[tnp6] != buf[y]) {
+                if (buf[tnp6] != '#' && buf[tnp6] != 'o' && buf[tnp6] != buf[sp]) {
                     boxes[BoxPos(boxes, tnp2)]._box += (w + 1);
                     buf[tnp6] = buf[tnp2];
-                    buf[tnp2] = buf[x];
-                    buf[x] = ' ';
-                    x += (w + 1);
+                    buf[tnp2] = buf[fp];
+                    buf[fp] = ' ';
+                    fp += (w + 1);
                     for (auto a : plus) {
                         if (a == tnp6) {
                             boxes[BoxPos1(boxes, plus)]._win = true;
                         }
-                        if ((x - w - 1) == a) {
-                            buf[x - w - 1] = '+';
+                        if ((fp - w - 1) == a) {
+                            buf[fp - w - 1] = '+';
                         }
                         if (tnp2 == a) {
                             boxes[BoxPos(boxes, tnp6)]._win = false;
@@ -423,12 +488,12 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
                     }
                 }
             } else {
-                buf[tnp2] = buf[x];
-                buf[x] = ' ';
-                x += (w + 1);
+                buf[tnp2] = buf[fp];
+                buf[fp] = ' ';
+                fp += (w + 1);
                 for (auto a : plus) {
-                    if ((x - w - 1) == a) {
-                        buf[x - w - 1] = '+';
+                    if ((fp - w - 1) == a) {
+                        buf[fp - w - 1] = '+';
                     }
                 }
             }
@@ -436,20 +501,20 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
     }
 
     else if (key.vk == TCODK_LEFT || rand == 3) {
-            if (buf[tnp3] != '#' && buf[tnp3] != buf[y]) {
+            if (buf[tnp3] != '#' && buf[tnp3] != buf[sp]) {
                 if (buf[tnp3] == 'o') {
-                    if (buf[tnp7] != '#' && buf[tnp7] != 'o' && buf[tnp7] != buf[y]) {
+                    if (buf[tnp7] != '#' && buf[tnp7] != 'o' && buf[tnp7] != buf[sp]) {
                         boxes[BoxPos(boxes, tnp3)]._box -= 1;
                         buf[tnp7] = buf[tnp3];
-                        buf[tnp3] = buf[x];
-                        buf[x] = ' ';
-                        x -= 1;
+                        buf[tnp3] = buf[fp];
+                        buf[fp] = ' ';
+                        fp -= 1;
                         for (auto a : plus) {
                             if (a == tnp7) {
                                 boxes[BoxPos1(boxes, plus)]._win = true;
                             }
-                            if ((x + 1) == a) {
-                                buf[x + 1] = '+';
+                            if ((fp + 1) == a) {
+                                buf[fp + 1] = '+';
                             }
                             if (tnp3 == a) {
                                 boxes[BoxPos(boxes, tnp7)]._win = false;
@@ -457,32 +522,32 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
                         }
                     }
                 } else {
-                        buf[tnp3] = buf[x];
-                        buf[x] = ' ';
-                        x -= 1;
+                        buf[tnp3] = buf[fp];
+                        buf[fp] = ' ';
+                        fp -= 1;
                         for (auto a : plus) {
-                            if ((x + 1) == a) {
-                                buf[x + 1] = '+';
+                            if ((fp + 1) == a) {
+                                buf[fp + 1] = '+';
                             }
                         }
                     }
                 }
             }
     else if (key.vk == TCODK_RIGHT || rand == 4) {
-                if (buf[tnp4] != '#' && buf[tnp4] != buf[y]) {
+                if (buf[tnp4] != '#' && buf[tnp4] != buf[sp]) {
                     if (buf[tnp4] == 'o') {
-                        if (buf[tnp8] != '#' && buf[tnp8] != 'o' && buf[tnp8] != buf[y]) {
+                        if (buf[tnp8] != '#' && buf[tnp8] != 'o' && buf[tnp8] != buf[sp]) {
                             boxes[BoxPos(boxes, tnp4)]._box += 1;
                             buf[tnp8] = buf[tnp4];
-                            buf[tnp4] = buf[x];
-                            buf[x] = ' ';
-                            x += 1;
+                            buf[tnp4] = buf[fp];
+                            buf[fp] = ' ';
+                            fp += 1;
                             for (auto a : plus) {
                                 if (a == tnp8) {
                                     boxes[BoxPos1(boxes, plus)]._win = true;
                                 }
-                                if ((x - 1) == a) {
-                                    buf[x - 1] = '+';
+                                if ((fp - 1) == a) {
+                                    buf[fp - 1] = '+';
                                 }
                                 if (tnp4 == a) {
                                     boxes[BoxPos(boxes, tnp8)]._win = false;
@@ -490,12 +555,12 @@ void Moving(char *buf, int x, int y, const std::vector<int>& plus, TCOD_key_t ke
                             }
                         }
                     } else {
-                            buf[tnp4] = buf[x];
-                            buf[x] = ' ';
-                            x += 1;
+                            buf[tnp4] = buf[fp];
+                            buf[fp] = ' ';
+                        fp += 1;
                             for (auto a : plus) {
-                                if ((x - 1) == a) {
-                                    buf[x - 1] = '+';
+                                if ((fp - 1) == a) {
+                                    buf[fp - 1] = '+';
                                 }
                             }
                         }
@@ -619,4 +684,102 @@ int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int 
         }
     }
     return rand;
+}
+
+int Time::GetCurrentTime(int interval, int timer1, int sttime){
+    //return timer = interval + timer1 - time(0) + sttime;
+    return interval + timer1 - time(0) + sttime;
+}
+
+void Time::Reset(int timer, int timer1, int interval, int sttime){
+    timer = timer1;
+    interval = time(0) - sttime;
+}
+
+void Player::Turn(char *b2, char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int timer, int timer1, int interval, int sttime, Time t){
+    TCOD_key_t key;
+    int rndmoves;
+    if (b2[0] == '1') {
+        switch (b2[1]) {
+            case '4':
+                key.vk = TCODK_UP;
+                break;
+            case '7':
+                key.vk = TCODK_DOWN;
+                break;
+            case '5':
+                key.vk = TCODK_LEFT;
+                break;
+            case '6':
+                key.vk = TCODK_RIGHT;
+                break;
+            default:
+                break;
+        }
+
+        Moving(buf, fp, sp, plus, key, newNum, rndmoves, w, h);
+        t.Reset(timer, timer1, interval, sttime);
+        key.vk = TCODK_NONE;
+        memset(b2, 0, sizeof(b2));
+    }
+}
+
+void Player::RandomTurn(char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int timer, int timer1, int interval, int sttime, Time t){
+    int rndmoves;
+    TCOD_key_t key;
+    std::cout << "rand first" << std::endl;
+    rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
+    Moving(buf, fp, sp, plus, key, newNum, rndmoves, w, h);
+    t.Reset(timer, timer1, interval, sttime);
+    rndmoves = 0;
+}
+
+void Player::WhoIsWho(char f, char s, char *buf, int fp, int sp){
+    for (int i = 6; i < strlen(buf); i++){
+        if (buf[i] == f) {
+            fp = i;
+        }
+        if (buf[i] == s) {
+             sp = i;
+        }
+    }
+}
+
+void Player::Send(char *buf, char *nbuf, const std::vector<Box>& box, int ns1, int ns2, int timer){
+    Convert(buf, nbuf, box, timer);
+    send(ns1, nbuf, sizeof(nbuf), 0);
+    send(ns2, nbuf, sizeof(nbuf), 0);
+    printf("Map message sent\n");
+}
+
+void Player::Lose(char *buf, const std::vector<Box>& box, Player pl, int ns1, int ns2) {
+    if (box[LosePos(box)]._num == 0) {
+        if (pl._brake == true) {
+            buf[0] = 'L';
+            send(ns1, buf, strlen(buf), 0);
+            buf[0] = 'W';
+            send(ns2, buf, strlen(buf), 0);
+        } else {
+            buf[0] = 'W';
+            send(ns1, buf, strlen(buf), 0);
+            buf[0] = 'L';
+            send(ns2, buf, strlen(buf), 0);
+        }
+    }
+}
+
+void Player::Win(char *buf, const std::vector<Box>& box, Player pl, int ns1, int ns2){
+    if (WinPos(box)) {
+        if (pl._brake  == true) {
+            buf[0] = 'W';
+            send(ns1, buf, strlen(buf), 0);
+            buf[0] = 'L';
+            send(ns2, buf, strlen(buf), 0);
+        } else {
+            buf[0] = 'L';
+            send(ns1, buf, strlen(buf), 0);
+            buf[0] = 'W';
+            send(ns2, buf, strlen(buf), 0);
+        }
+    }
 }
