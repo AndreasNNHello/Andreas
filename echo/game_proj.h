@@ -31,7 +31,7 @@ public:
     }
 
     int GetCurrentTime(int, int, int);
-    void Reset(int, int, int, int);
+    void Reset(int*, int, int*, int);
 
     //~Time();
 private:
@@ -47,14 +47,17 @@ public:
 
     }
 
-    void Turn(char *, char *, int, int, const std::vector<int>&, std::vector<Box>&, int, int, int, int, int, int, Time);
-    void RandomTurn(char *, int, int, const std::vector<int>& , std::vector<Box>& , int , int, int, int, int, int, Time);
-    void WhoIsWho(char , char , char *, int, int);
+    void Turn(char *, char *, int , int , const std::vector<int>&, std::vector<Box>&, int, int, int*, int*, int*, int*, Time);
+    void RandomTurn(char *, int , int , const std::vector<int>& , std::vector<Box>& , int , int, int*, int*, int*, int*, Time);
+    void WhoIsWho(char , char , char *, int*, int*);
     void Send(char *, char *, const std::vector<Box>&, int, int, int);
     static void Lose(char *, const std::vector<Box>&, Player, int, int);
     static void Win(char *, const std::vector<Box>&, Player, int, int);
     void setBrake(bool f) {
-        _brake = f;
+       _brake = f;
+    }
+    bool getBrake(){
+        return _brake;
     }
 
     //~Player();

@@ -26,7 +26,7 @@ int main() {
     }
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(50002);
+    addr.sin_port = htons(52002);
 
     if (connect(clsock, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
         perror("not connection");
