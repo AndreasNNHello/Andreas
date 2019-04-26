@@ -138,8 +138,7 @@ int main() {
                     std::cout << "bool sec: " << pl2.getBrake() << std::endl;
                 }
                 pl1.Send(buf, nbuf, newNum, newsock1, newsock2, timer);
-            }
-            if (pl2.getBrake()) {
+            } else if (pl2.getBrake()) {
                 if (z = (recv(newsock2, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
                     perror("recv2");
                 }
