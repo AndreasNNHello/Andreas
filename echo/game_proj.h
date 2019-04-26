@@ -33,7 +33,7 @@ public:
     int GetCurrentTime(int, int, int);
     void Reset(int*, int, int*, int);
 
-    //~Time();
+    ~Time(){};
 private:
     int _t;
 };
@@ -60,7 +60,7 @@ public:
         return _brake;
     }
 
-    //~Player();
+    ~Player(){};
 private:
     char _first;
     char _second;
