@@ -16,7 +16,7 @@
 
 
 int main() {
-    int clsock;
+    int clsock, score, score1, score2;
     int w, h;
     struct sockaddr_in addr;
 
@@ -56,11 +56,15 @@ int main() {
         if ((z = recv(clsock, c, SIZE_MAX, 0)) == -1) {
             perror("error");
         }
+        score = std::atoi(&c[strlen(c)-3]);
+        score1 = std::atoi(&c[strlen(c)-2]);
+        score2 = std::atoi(&c[strlen(c)-1]);
+        std::string yourScore = "Name: " + std::to_string(score) + std::to_string(score1) + std::to_string(score2);
         if (c[0] == 'L') {
             TCODConsole::initRoot(45, 45, "You Lose!", false, TCOD_RENDERER_GLSL);
             TCODConsole::root->setDefaultBackground(asd());
             TCODConsole::root->clear();
-            TCODConsole::root->print(5, 5, "Name");//yourScore.c_str());
+            TCODConsole::root->print(5, 5, yourScore.c_str());
             TCODConsole::root->flush();
             std::cin.get();
         } else if (c[0] == 'W') {
@@ -68,7 +72,7 @@ int main() {
             TCODConsole::root->setDefaultBackground(asd());
             TCODConsole::root->clear();
             //TCODConsole::root->printEx(15,15, TCOD_BKGND_BURN, TCOD_CENTER, "Congratulation!", TCOD_COLOR_BLUE);
-            TCODConsole::root->print(5, 5, "Name");//yourScore.c_str());
+            TCODConsole::root->print(5, 5, yourScore.c_str());
             TCODConsole::root->flush();
             std::cin.get();
         } else {
