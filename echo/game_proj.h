@@ -41,16 +41,16 @@ private:
 class Player: public Time{
 public:
     Player() = default;
-    Player(char f, char s, bool br)
-            : _first(f), _second(s), _brake(br)
+    Player(bool br)
+            : _brake(br)
     {
 
     }
 
-    void Turn(char *, char *, int , int , const std::vector<int>&, std::vector<Box>&, int, int, int*, int*, int*, int*, Time);
-    void RandomTurn(char *, int , int , const std::vector<int>& , std::vector<Box>& , int , int, int*, int*, int*, int*, Time);
+    void Turn(char *, char *, int , int , const std::vector<int>&, std::vector<Box>&, int, int, int*, int*, int*, int*, Time, int*, int*);
+    void RandomTurn(char *, int , int , const std::vector<int>& , std::vector<Box>& , int , int, int*, int*, int*, int*, Time, int*, int*);
     void WhoIsWho(char , char , char *, int*, int*);
-    void Send(char *, char *, const std::vector<Box>&, int, int, int);
+    void Send(char *, char *, const std::vector<Box>&, int, int, int, int, int);
     static void Lose(char *, const std::vector<Box>&, Player, int, int);
     static void Win(char *, const std::vector<Box>&, Player, int, int);
     void setBrake(bool f) {
@@ -62,8 +62,6 @@ public:
 
     ~Player(){};
 private:
-    char _first;
-    char _second;
     bool _brake;
 
 };
@@ -107,9 +105,9 @@ int BoxPos1(const std::vector<Box>& k, const std::vector<int>& m);
 int BoxPos(const std::vector<Box>& k, int t);
 void Moving(char *buf, int fp, int sp, const std::vector<int>& plus, TCOD_key_t key, std::vector<Box>& boxes, int rnd, int w, int h);
 void CreateBoxAndPlus(std::vector<Box>& b, char *buf, int w, int h, std::vector<int>& plus, int* c_ptr);
-void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer);
+void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer, int score);
 int ControlRand(char *buf, int tnp, int tnp2, int tnp3, int tnp4, int tnp5, int tnp6, int tnp7, int tnp8, int y, int rand);
 
 void Paint(char *c);
 
-#endif GAME_PROJ_H
+#endif

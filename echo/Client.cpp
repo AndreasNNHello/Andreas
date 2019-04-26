@@ -26,7 +26,7 @@ int main() {
     }
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(52002);
+    addr.sin_port = htons(51002);
 
     if (connect(clsock, (const struct sockaddr *) &addr, sizeof(addr)) == -1) {
         perror("not connection");
@@ -89,13 +89,16 @@ int main() {
 
 }
 void Paint(char *c){
-    int w, h, timer;
+    int w, h, timer, score;
     int i = 6;
     h = std::atoi(&c[0]);
     w = std::atoi(&c[3]);
-    timer = std::atoi(&c[strlen(c)-1]);
+    timer = std::atoi(&c[strlen(c)-5]);
+    score = std::atoi(&c[strlen(c)-3]);
     std::string strtime = std::to_string(timer / 60) + ":" + std::to_string(timer % 60);
+    std::string strtime1 = std::to_string(score);
     TCODConsole::root->print(1, 1, strtime.c_str());
+    TCODConsole::root->print(w-5, 1, strtime1.c_str());
     for (auto y = 2; y < h + 2; y++) {
         for (auto x = 0; x < w; x++) {
             if (c[i] == '\n') {

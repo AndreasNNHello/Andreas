@@ -21,16 +21,13 @@
 #include <fcntl.h>
 
 int main() {
-    int sock, newsock1, newsock2, sz, count, turn = 0, Score,
-        timer1, interval = 0, timer, sttime;
+    int sock, newsock1, newsock2, sz, count, turnf = 0, scoref = 700,
+        timer1, scores = 700, interval = 0, turns = 0, timer, sttime;
     int firstPlrPos, secondPlrPos;
     struct sockaddr_in addr, cl_addr;
     struct sockaddr *cp;
-    bool brake1 = true;
-    bool brake2 = false;
     char buf[SIZE_MAX] = {0};
     char buf2[SIZE_MAX] = {0};
-    //char buf3[SIZE_MAX] = {0};
     char nbuf[SIZE_MAX] = {0};
     std::string nameMap;
     std::map<int, std::string> maps;
@@ -53,10 +50,11 @@ int main() {
 
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
-    addr.sin_port = htons(52002);
+    addr.sin_port = htons(51002);
 
     if (bind(sock, (struct sockaddr *) &addr, sz) == -1) {
         perror("no binding");
+        close(sock);
     }
 
     if (listen(sock, 1) == -1) {
@@ -78,7 +76,7 @@ int main() {
               get_approp_addr((struct sockaddr *) &cl_addr),
               address_pres, sizeof address_pres);
     printf("server: Client connection from %s\n", address_pres);
-    Convert(buf, nbuf, newNum, count);
+    Convert(buf, nbuf, newNum, count, scoref);
     send(newsock1, nbuf, strlen(nbuf), 0);
     printf("Map message sent\n");
 
@@ -93,7 +91,7 @@ int main() {
               get_approp_addr((struct sockaddr *) &cl_addr),
               address_pres, sizeof address_pres);
     printf("server: Client connection from %s\n", address_pres);
-    Convert(buf, nbuf, newNum, count);
+    Convert(buf, nbuf, newNum, count, scores);
     send(newsock2, nbuf, strlen(nbuf), 0);
     printf("Map message sent\n");
 
@@ -101,69 +99,58 @@ int main() {
     interval = 0;
     timer = count;
     sttime = time(0);
-    //TCOD_key_t key;
-    //int rndmoves;
-    Player pl1('@', '$', true);
-    Player pl2('$', '@', false);
+    Player pl(true);
     Time timer2(count);
     while (1) {
         if (newsock1 == -1 || newsock2 == -1) {
             perror("no accept");
         }
 
-
-
-
         int z;
 
         if (timer2.GetCurrentTime(interval, timer1, sttime) != timer){
-            if (pl1.getBrake()) {
+            if (pl.getBrake()) {
                 if (z = (recv(newsock1, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
                     perror("recv1");
                  }
-                pl1.WhoIsWho('@', '$', buf, &firstPlrPos, &secondPlrPos);
+                pl.WhoIsWho('@', '$', buf, &firstPlrPos, &secondPlrPos);
                 timer = timer2.GetCurrentTime(interval, timer1, sttime);
                 if (timer == 0){
-                    pl1.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2);
-                    pl1.setBrake(false);
-                    pl2.setBrake(true);
-                    std::cout << "bool first: " << pl1.getBrake() << std::endl;
-                    std::cout << "bool sec: " << pl2.getBrake() << std::endl;
+                    pl.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2, &turnf, &scoref);
+                    pl.setBrake(false);
+                    std::cout << pl.getBrake() << std::endl;
+                    std::cout << "first rand" << std::endl;
+                } else {
+                    if (buf2[0] == '1'){
+                    pl.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2, &turnf, &scoref);
+                    pl.setBrake(false);
+                    std::cout << "turn" << std::endl;
+                    }
                 }
-                if (z > 0) {
-                    pl1.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2);
-                    pl1.setBrake(false);
-                    pl2.setBrake(true);
-                    std::cout << "bool first: " << pl1.getBrake() << std::endl;
-                    std::cout << "bool sec: " << pl2.getBrake() << std::endl;
-                }
-                pl1.Send(buf, nbuf, newNum, newsock1, newsock2, timer);
-            } else if (pl2.getBrake()) {
+                pl.Send(buf, nbuf, newNum, newsock1, newsock2, timer, scoref, scores);
+                std::cout << "first send" << std::endl;
+            } else {
                 if (z = (recv(newsock2, (char *) &buf2, SIZE_MAX, MSG_DONTWAIT)) == -1) {
                     perror("recv2");
                 }
-                pl2.WhoIsWho('$', '@', buf, &firstPlrPos, &secondPlrPos);
+                pl.WhoIsWho('$', '@', buf, &firstPlrPos, &secondPlrPos);
                 timer = timer2.GetCurrentTime(interval, timer1, sttime);
                 if (timer == 0){
-                    pl2.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2);
-                    std::cout << "bool2 first: " << pl1.getBrake() << std::endl;
-                    std::cout << "bool2 sec: " << pl2.getBrake() << std::endl;
-                    pl1.setBrake(true);
-                    pl2.setBrake(false);
-                    std::cout << "bool2 first: " << pl1.getBrake() << std::endl;
-                    std::cout << "bool2 sec: " << pl2.getBrake() << std::endl;
+                    pl.RandomTurn(buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2, &turns, &scores);
+                    std::cout << "second rand" << std::endl;
+                    pl.setBrake(true);
+                } else {
+                    if (buf2[0] == '1'){
+                    pl.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2, &turns, &scores);
+                    pl.setBrake(true);
+                    std::cout << "second turn" << std::endl;
+                    }
                 }
-                if (z > 0) {
-                    pl2.Turn(buf2, buf, firstPlrPos, secondPlrPos, Plus, newNum, w, h, &timer, &timer1, &interval, &sttime, timer2);
-                    pl1.setBrake(true);
-                    pl2.setBrake(false);
-                    std::cout << "bool2 first: " << pl1.getBrake() << std::endl;
-                    std::cout << "bool2 sec: " << pl2.getBrake() << std::endl;
-                }
-                pl2.Send(buf, nbuf, newNum, newsock1, newsock2, timer);
+                pl.Send(buf, nbuf, newNum, newsock1, newsock2, timer, scoref, scores);
+                std::cout << "second send" << std::endl;
             }
-            Player::Lose(buf, newNum, pl1, newsock1, newsock2);
-            Player::Win(buf, newNum, pl1, newsock1, newsock2);
+            Player::Lose(buf, newNum, pl, newsock1, newsock2);
+            Player::Win(buf, newNum, pl, newsock1, newsock2);
         }
     }
 #pragma clang diagnostic pop
@@ -270,8 +257,6 @@ void Moving(char *buf, int fp, int sp, const std::vector<int>& plus, TCOD_key_t 
     int tnp6 = fp + w * 2 + 2;
     int tnp7 = fp - 2;
     int tnp8 = fp + 2;
-
-    std::cout << "fp: " << fp << std::endl << "sp: " << sp << std::endl;
 
     if (rnd != 0) {
         rand = ControlRand(buf, tnp, tnp2, tnp3, tnp4, tnp5, tnp6, tnp7, tnp8, sp, rnd);
@@ -413,8 +398,7 @@ void Moving(char *buf, int fp, int sp, const std::vector<int>& plus, TCOD_key_t 
                         }
                     }
                 }
-                //turn++;
-                //Score = 700-turn*10;
+
                 for (auto num = boxes.begin(); num != boxes.end(); num++) {
                     if (num->_win == false) {
                         num->_num--;
@@ -441,27 +425,6 @@ bool WinPos(const std::vector<Box>& m){
     } else {
         return  false;
     }
-}
-
-void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer){
-    char chArray[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-                      'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-                      'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
-                      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-                      'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                      'Y', 'Z'};
-    char *pos = chArray;
-    std::strcpy(nb, b);
-    for (int i = 6; i < strlen(nb); i++){
-        for (auto p : boxes){
-            if (i == p._box){
-                nb[i] = pos[p._num-1];
-}
-    }
-    }
-    std::string nstr = std::to_string(timer);
-    std::strcpy(& nb[strlen(nb) - 1], nstr.c_str());
 }
 
 int BoxPos(const std::vector<Box>& k, int t) {
@@ -542,7 +505,7 @@ void Time::Reset(int* timer, int timer1, int* interval, int sttime){
     *interval = time(0) - sttime;
 }
 
-void Player::Turn(char *b2, char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int* timer, int* timer1, int* interval, int* sttime, Time t){
+void Player::Turn(char *b2, char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int* timer, int* timer1, int* interval, int* sttime, Time t, int* turn, int* score){
     TCOD_key_t key;
     int rndmoves;
     if (b2[0] == '1') {
@@ -565,17 +528,21 @@ void Player::Turn(char *b2, char *buf, int fp, int sp, const std::vector<int>& p
 
         Moving(buf, fp, sp, plus, key, newNum, rndmoves, w, h);
         t.Reset(timer, *timer1, interval, *sttime);
+        *turn += 1;
+        *score = 700 - (*turn * 10);
         key.vk = TCODK_NONE;
         memset(b2, 0, sizeof(b2));
     }
 }
 
-void Player::RandomTurn(char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int* timer, int* timer1, int* interval, int* sttime, Time t){
+void Player::RandomTurn(char *buf, int fp, int sp, const std::vector<int>& plus, std::vector<Box>& newNum, int w, int h, int* timer, int* timer1, int* interval, int* sttime, Time t, int* turn, int* score){
     int rndmoves;
     TCOD_key_t key;
-    std::cout << "rand first" << std::endl;
+    std::cout << "rand turn" << std::endl;
     rndmoves = TCODRandom::getInstance()->getInt(1, 4, 0);
     Moving(buf, fp, sp, plus, key, newNum, rndmoves, w, h);
+    *turn += 1;
+    *score = 700-*turn*20;
     t.Reset(timer, *timer1, interval, *sttime);
     rndmoves = 0;
 }
@@ -591,17 +558,40 @@ void Player::WhoIsWho(char f, char s, char *buf, int *fp, int *sp){
     }
 }
 
-void Player::Send(char *buf, char *nbuf, const std::vector<Box>& box, int ns1, int ns2, int timer){
-    Convert(buf, nbuf, box, timer);
+void Convert(char* b, char* nb, const std::vector<Box>& boxes, int timer, int score){
+    char chArray[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+                      'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                      'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D',
+                      'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                      'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                      'Y', 'Z'};
+    char *pos = chArray;
+    std::strcpy(nb, b);
+    for (int i = 6; i < strlen(nb); i++){
+        for (auto p : boxes){
+            if (i == p._box){
+                nb[i] = pos[p._num-1];
+            }
+        }
+    }
+    std::string nstr = std::to_string(timer) + "\n";
+    std::strcpy(& nb[strlen(nb) - 1], nstr.c_str());
+    std::string nstr1 = std::to_string(score);
+    std::strcpy(& nb[strlen(nb)], nstr1.c_str());
+}
+
+void Player::Send(char *buf, char *nbuf, const std::vector<Box>& box, int ns1, int ns2, int timer, int score1, int score2){
+    Convert(buf, nbuf, box, timer, score1);
     send(ns1, nbuf, SIZE_MAX, 0);
+    Convert(buf, nbuf, box, timer, score2);
     send(ns2, nbuf, SIZE_MAX, 0);
-    std::cout << "timer send: " << timer << std::endl;
     printf("Map message sent\n");
 }
 
 void Player::Lose(char *buf, const std::vector<Box>& box, Player pl, int ns1, int ns2) {
     if (box[LosePos(box)]._num == 0) {
-        if (pl._brake == true) {
+        if (pl.getBrake()) {
             buf[0] = 'L';
             send(ns1, buf, strlen(buf), 0);
             buf[0] = 'W';
@@ -617,7 +607,7 @@ void Player::Lose(char *buf, const std::vector<Box>& box, Player pl, int ns1, in
 
 void Player::Win(char *buf, const std::vector<Box>& box, Player pl, int ns1, int ns2){
     if (WinPos(box)) {
-        if (pl._brake  == true) {
+        if (pl.getBrake()) {
             buf[0] = 'W';
             send(ns1, buf, strlen(buf), 0);
             buf[0] = 'L';
