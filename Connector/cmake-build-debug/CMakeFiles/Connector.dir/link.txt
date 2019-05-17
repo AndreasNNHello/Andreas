@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Connector.dir/main.cpp.o  -o Connector  -L/home/andreas/cmake-3.6.2/Utilities/cmcurl  -L/home/andreas/Desktop/libxl-3.8.5.0  -L/home/andreas/Desktop/xlnt-master -Wl,-rpath,/home/andreas/cmake-3.6.2/Utilities/cmcurl:/home/andreas/Desktop/libxl-3.8.5.0:/home/andreas/Desktop/xlnt-master -lxlnt -lcurl 

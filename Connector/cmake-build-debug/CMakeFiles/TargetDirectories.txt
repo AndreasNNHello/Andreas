@@ -1,0 +1,3 @@
+/home/andreas/CLionProjects/Connector/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/andreas/CLionProjects/Connector/cmake-build-debug/CMakeFiles/Connector.dir
+/home/andreas/CLionProjects/Connector/cmake-build-debug/CMakeFiles/edit_cache.dir
